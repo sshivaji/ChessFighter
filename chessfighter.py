@@ -101,8 +101,13 @@ class MainWindow(QWidget):
         return drawBoardSvg
 
 
-if __name__ == "__main__":
-    chessTitan = QApplication(sys.argv)
+def main():
+    """Makes the script to be executed."""
+    chessFighter = QApplication(sys.argv)
     window = MainWindow()
     window.show()
-    chessTitan.exec()
+    chessFighter.exec()
+
+
+if __name__ == "__main__":
+    main()
