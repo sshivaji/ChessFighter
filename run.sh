@@ -1,4 +1,5 @@
-#!/usr/bin/env bash
+#! /usr/bin/env bash
+
 if [ ! -d "chessenv" ]; then
     virtualenv -ppython3 chessenv
 fi
