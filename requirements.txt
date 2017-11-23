@@ -1,2 +1,2 @@
-python-chess==0.22.0
-pyQT5==5.9.1
+PyQt5 5.9.1
+python-chess 0.22.0
