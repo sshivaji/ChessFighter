@@ -6,23 +6,172 @@ Chess Fighter.
 """
 
 import sys
-from PyQt5 import QtGui
+from PyQt5 import QtGui, QtCore
 
 import chess
 import chess.pgn
 import chess.svg
 
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QApplication, QWidget
-from PyQt5.QtWidgets import QGridLayout
-from PyQt5.QtWidgets import QGroupBox
-from PyQt5.QtWidgets import QLabel
+from PyQt5.QtCore import QRect, QSize, Qt
+from PyQt5.QtWidgets import (QApplication, QFrame, QLabel, QLayout,
+        QTextBrowser, QWidget, QWidgetItem)
 from PyQt5.QtWidgets import QPushButton
-from PyQt5.QtWidgets import QTextBrowser
-from PyQt5.QtWidgets import QTextEdit
+from PyQt5.QtWidgets import QTabWidget
 from PyQt5.QtWidgets import QVBoxLayout
 
-from auto_resizing_text_edit import AutoResizingTextEdit
+
+class ItemWrapper(object):
+    def __init__(self, i, p):
+        self.item = i
+        self.position = p
+
+
+class BorderLayout(QLayout):
+    West, North, South, East, Center = range(5)
+    MinimumSize, SizeHint = range(2)
+
+    def __init__(self, parent=None, margin=None, spacing=-1):
+        super(BorderLayout, self).__init__(parent)
+
+        if margin is not None:
+            self.setContentsMargins(margin, margin, margin, margin)
+
+        self.setSpacing(spacing)
+        self.list = []
+
+    def __del__(self):
+        l = self.takeAt(0)
+        while l is not None:
+            l = self.takeAt(0)
+
+    def addItem(self, item):
+        self.add(item, self.West)
+
+    def addWidget(self, widget, position):
+        self.add(QWidgetItem(widget), position)
+
+    def expandingDirections(self):
+        return Qt.Horizontal | Qt.Vertical
+
+    def hasHeightForWidth(self):
+        return False
+
+    def count(self):
+        return len(self.list)
+
+    def itemAt(self, index):
+        if index < len(self.list):
+            return self.list[index].item
+
+        return None
+
+    def minimumSize(self):
+        return self.calculateSize(self.MinimumSize)
+
+    def setGeometry(self, rect):
+        center = None
+        eastWidth = 0
+        westWidth = 0
+        northHeight = 0
+        southHeight = 0
+        centerHeight = 0
+
+        super(BorderLayout, self).setGeometry(rect)
+
+        for wrapper in self.list:
+            item = wrapper.item
+            position = wrapper.position
+
+            if position == self.North:
+                item.setGeometry(QRect(rect.x(), northHeight,
+                        rect.width(), item.sizeHint().height()))
+
+                northHeight += item.geometry().height() + self.spacing()
+
+            elif position == self.South:
+                item.setGeometry(QRect(item.geometry().x(),
+                        item.geometry().y(), rect.width(),
+                        item.sizeHint().height()))
+
+                southHeight += item.geometry().height() + self.spacing()
+
+                item.setGeometry(QRect(rect.x(),
+                        rect.y() + rect.height() - southHeight + self.spacing(),
+                        item.geometry().width(), item.geometry().height()))
+
+            elif position == self.Center:
+                center = wrapper
+
+        centerHeight = rect.height() - northHeight - southHeight
+
+        for wrapper in self.list:
+            item = wrapper.item
+            position = wrapper.position
+
+            if position == self.West:
+                item.setGeometry(QRect(rect.x() + westWidth,
+                        northHeight, item.sizeHint().width(), centerHeight))
+
+                westWidth += item.geometry().width() + self.spacing()
+
+            elif position == self.East:
+                item.setGeometry(QRect(item.geometry().x(),
+                        item.geometry().y(), item.sizeHint().width(),
+                        centerHeight))
+
+                eastWidth += item.geometry().width() + self.spacing()
+
+                item.setGeometry(QRect(rect.x() + rect.width() - eastWidth + self.spacing(),
+                        northHeight, item.geometry().width(),
+                        item.geometry().height()))
+
+        if center:
+            center.item.setGeometry(QRect(westWidth, northHeight,
+                    rect.width() - eastWidth - westWidth, centerHeight))
+
+    def sizeHint(self):
+        return self.calculateSize(self.SizeHint)
+
+    def takeAt(self, index):
+        if index >= 0 and index < len(self.list):
+            layoutStruct = self.list.pop(index)
+            return layoutStruct.item
+
+        return None
+
+    def add(self, item, position):
+        self.list.append(ItemWrapper(item, position))
+
+    def calculateSize(self, sizeType):
+        totalSize = QSize()
+
+        for wrapper in self.list:
+            position = wrapper.position
+            itemSize = QSize()
+
+            if sizeType == self.MinimumSize:
+                itemSize = wrapper.item.minimumSize()
+            else: # sizeType == self.SizeHint
+                itemSize = wrapper.item.sizeHint()
+
+            if position in (self.North, self.South, self.Center):
+                totalSize.setHeight(totalSize.height() + itemSize.height())
+
+            if position in (self.West, self.East, self.Center):
+                totalSize.setWidth(totalSize.width() + itemSize.width())
+
+        return totalSize
+
+
+class ChessBoardWidget(QSvgWidget):
+    # Chessboard resize should always be a square
+    def resizeEvent(self, event):
+        # Create a square base size of 10x10 and scale it to the new size
+        # maintaining aspect ratio.
+        new_size = QSize(10, 10)
+        new_size.scale(event.size(), QtCore.Qt.KeepAspectRatio)
+        self.resize(new_size)
 
 
 class MainWindow(QWidget):
@@ -33,41 +182,56 @@ class MainWindow(QWidget):
         """
         Initializes the chessboard.
         """
-        super().__init__()
+        super(MainWindow, self).__init__()
+        self.widgetSvg = ChessBoardWidget()
 
-        self.setWindowTitle("Chess GUI")
-        self.setGeometry(300, 300, 800, 800)
+        layout = BorderLayout()
+        layout.addWidget(self.widgetSvg, BorderLayout.Center)
 
-        self.widgetSvg = QSvgWidget()
-        # self.widgetSvg.setGeometry(0, 0, 600, 600)
+        # Because BorderLayout doesn't call its super-class addWidget() it
+        # doesn't take ownership of the widgets until setLayout() is called.
+        # Therefore we keep a local reference to each label to prevent it being
+        # garbage collected too soon.
 
-        self.horizontalGroupBox = QGroupBox("Chess Fighter")
-        layout = QGridLayout()
+        label_n = self.createLabel("Controls")
+        layout.addWidget(label_n, BorderLayout.North)
 
+        self.game_pgn = QTextBrowser()
+        layout.addWidget(self.game_pgn, BorderLayout.East)
+
+        # Initialize tab screen
+        self.tabs = QTabWidget()
+        self.tab1 = QWidget()
+        self.tab2 = QWidget()
+        self.tab3 = QWidget()
+
+        # self.tabs.resize(300, 300)
+        # self.tabs.setTabBar(self.tab_bar)
+
+        # Add tabs
+        self.tabs.addTab(self.tab1, "Database")
+        self.tabs.addTab(self.tab2, "Book")
+        self.tabs.addTab(self.tab3, "Engine")
+
+        # Create first tab
+        self.tab1.layout = QVBoxLayout(self)
+        self.pushButton1 = QPushButton("Database")
+        self.tab1.layout.addWidget(self.pushButton1)
+        self.tab1.setLayout(self.tab1.layout)
+
+        # self.label_database = self.createLabel("Database")
+        layout.addWidget(self.tabs, BorderLayout.South)
+
+        self.setLayout(layout)
+        self.setWindowTitle("Chess Fighter")
+
+
+        # Action Handlers
         self.widgetSvg.mouseReleaseEvent = self.boardMousePressEvent
 
-        chess_board_end_pos = 35
-
-        self.board_controls = QTextEdit('Board Controls')
-        self.board_controls.setReadOnly(True)
-
-        self.game_pgn = AutoResizingTextEdit()
-        self.game_pgn.setMinimumLines(20)
-
-        layout.addWidget(self.widgetSvg, 0, 0, chess_board_end_pos, chess_board_end_pos)
-        # layout.addWidget(self.board_controls, chess_board_end_pos+1, 1)
-        layout.addWidget(QTextEdit('Database/Engine Tab'), chess_board_end_pos+2, 1)
-        layout.addWidget(QTextEdit('Header'), 0, chess_board_end_pos)
-        layout.addWidget(self.game_pgn, 0, chess_board_end_pos)
-
-        self.horizontalGroupBox.setLayout(layout)
-        windowLayout = QVBoxLayout()
-        windowLayout.addWidget(self.horizontalGroupBox)
-        self.setLayout(windowLayout)
-
         self.margin = 0
-        self.pieceToMove = [None, None]
 
+        self.pieceToMove = [None, None]
         self.square = -10
         self.moveFromSquare = -10
         self.moveToSquare = -10
@@ -76,6 +240,12 @@ class MainWindow(QWidget):
         self.current_game = self.game
         self.board = chess.Board()
         self.drawBoard()
+
+    def createLabel(self, text):
+        label = QLabel(text)
+        label.setFrameStyle(QFrame.Box | QFrame.Raised)
+
+        return label
 
     def boardMousePressEvent(self, event):
         """
