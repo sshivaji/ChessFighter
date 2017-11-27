@@ -6,16 +6,24 @@ Chess Fighter.
 """
 
 import sys
+from PyQt5 import QtGui
 
 import chess
+import chess.pgn
 import chess.svg
 
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QApplication, QWidget
 from PyQt5.QtWidgets import QGridLayout
 from PyQt5.QtWidgets import QGroupBox
+from PyQt5.QtWidgets import QLabel
 from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtWidgets import QTextBrowser
+from PyQt5.QtWidgets import QTextEdit
 from PyQt5.QtWidgets import QVBoxLayout
+
+from auto_resizing_text_edit import AutoResizingTextEdit
+
 
 class MainWindow(QWidget):
     """
@@ -38,11 +46,19 @@ class MainWindow(QWidget):
 
         self.widgetSvg.mouseReleaseEvent = self.boardMousePressEvent
 
-        layout.addWidget(self.widgetSvg, 0, 0, 4, 4)
-        layout.addWidget(QPushButton('Board Controls'), 5, 1)
-        layout.addWidget(QPushButton('Database/Engine Tab'), 6, 1)
-        layout.addWidget(QPushButton('Header'), 0, 4)
-        layout.addWidget(QPushButton('Game PGN'), 1, 4)
+        chess_board_end_pos = 35
+
+        self.board_controls = QTextEdit('Board Controls')
+        self.board_controls.setReadOnly(True)
+
+        self.game_pgn = AutoResizingTextEdit()
+        self.game_pgn.setMinimumLines(20)
+
+        layout.addWidget(self.widgetSvg, 0, 0, chess_board_end_pos, chess_board_end_pos)
+        # layout.addWidget(self.board_controls, chess_board_end_pos+1, 1)
+        layout.addWidget(QTextEdit('Database/Engine Tab'), chess_board_end_pos+2, 1)
+        layout.addWidget(QTextEdit('Header'), 0, chess_board_end_pos)
+        layout.addWidget(self.game_pgn, 0, chess_board_end_pos)
 
         self.horizontalGroupBox.setLayout(layout)
         windowLayout = QVBoxLayout()
@@ -56,6 +72,8 @@ class MainWindow(QWidget):
         self.moveFromSquare = -10
         self.moveToSquare = -10
 
+        self.game = chess.pgn.Game()
+        self.current_game = self.game
         self.board = chess.Board()
         self.drawBoard()
 
@@ -87,6 +105,7 @@ class MainWindow(QWidget):
 
             if move in self.board.legal_moves:
                 self.board.push(move)
+                self.current_game = self.current_game.add_variation(move)
 
                 self.moveFromSquare = move.from_square
                 self.moveToSquare = move.to_square
@@ -110,6 +129,15 @@ class MainWindow(QWidget):
                                    check=check, coordinates=False)
         boardSvgEncoded = boardSvg.encode("utf-8")
         self.widgetSvg.load(boardSvgEncoded)
+
+        # New chess position, update other widgets
+        self.updateWidgets()
+
+    def updateWidgets(self):
+        exporter = chess.pgn.StringExporter(headers=True, variations=True, comments=True)
+        pgn_string = self.game.accept(exporter)
+        self.game_pgn.setText(pgn_string)
+        self.game_pgn.moveCursor(QtGui.QTextCursor.End)
 
 
 def main():

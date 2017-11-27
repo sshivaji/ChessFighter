@@ -1,2 +1,3 @@
 pyqt5==5.9.1
 python-chess==0.22.0
+auto-resizing-text-edit==0.1.0
