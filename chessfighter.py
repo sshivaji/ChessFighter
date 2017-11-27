@@ -16,6 +16,10 @@ from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtCore import QRect, QSize, Qt
 from PyQt5.QtWidgets import (QApplication, QFrame, QLabel, QLayout,
         QTextBrowser, QWidget, QWidgetItem)
+from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtWidgets import QTabWidget
+from PyQt5.QtWidgets import QVBoxLayout
+
 
 class ItemWrapper(object):
     def __init__(self, i, p):
@@ -161,7 +165,6 @@ class BorderLayout(QLayout):
 
 
 class ChessBoardWidget(QSvgWidget):
-
     # Chessboard resize should always be a square
     def resizeEvent(self, event):
         # Create a square base size of 10x10 and scale it to the new size
@@ -196,11 +199,32 @@ class MainWindow(QWidget):
         self.game_pgn = QTextBrowser()
         layout.addWidget(self.game_pgn, BorderLayout.East)
 
-        self.label_database = self.createLabel("Database")
-        layout.addWidget(self.label_database, BorderLayout.South)
+        # Initialize tab screen
+        self.tabs = QTabWidget()
+        self.tab1 = QWidget()
+        self.tab2 = QWidget()
+        self.tab3 = QWidget()
+
+        # self.tabs.resize(300, 300)
+        # self.tabs.setTabBar(self.tab_bar)
+
+        # Add tabs
+        self.tabs.addTab(self.tab1, "Database")
+        self.tabs.addTab(self.tab2, "Book")
+        self.tabs.addTab(self.tab3, "Engine")
+
+        # Create first tab
+        self.tab1.layout = QVBoxLayout(self)
+        self.pushButton1 = QPushButton("Database")
+        self.tab1.layout.addWidget(self.pushButton1)
+        self.tab1.setLayout(self.tab1.layout)
+
+        # self.label_database = self.createLabel("Database")
+        layout.addWidget(self.tabs, BorderLayout.South)
 
         self.setLayout(layout)
         self.setWindowTitle("Chess Fighter")
+
 
         # Action Handlers
         self.widgetSvg.mouseReleaseEvent = self.boardMousePressEvent
