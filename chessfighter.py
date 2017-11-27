@@ -10,10 +10,12 @@ import sys
 import chess
 import chess.svg
 
-from PyQt5.QtCore import pyqtSlot, Qt
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QApplication, QWidget
-
+from PyQt5.QtWidgets import QGridLayout
+from PyQt5.QtWidgets import QGroupBox
+from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtWidgets import QVBoxLayout
 
 class MainWindow(QWidget):
     """
@@ -28,13 +30,26 @@ class MainWindow(QWidget):
         self.setWindowTitle("Chess GUI")
         self.setGeometry(300, 300, 800, 800)
 
-        self.widgetSvg = QSvgWidget(parent=self)
-        self.widgetSvg.setGeometry(10, 10, 600, 600)
+        self.widgetSvg = QSvgWidget()
+        # self.widgetSvg.setGeometry(0, 0, 600, 600)
 
-        self.boardSize = min(self.widgetSvg.width(),
-                             self.widgetSvg.height())
-        self.margin = 0.05 * self.boardSize
-        self.squareSize = (self.boardSize - 2 * self.margin) / 8
+        self.horizontalGroupBox = QGroupBox("Chess Fighter")
+        layout = QGridLayout()
+
+        self.widgetSvg.mouseReleaseEvent = self.boardMousePressEvent
+
+        layout.addWidget(self.widgetSvg, 0, 0, 4, 4)
+        layout.addWidget(QPushButton('Board Controls'), 5, 1)
+        layout.addWidget(QPushButton('Database/Engine Tab'), 6, 1)
+        layout.addWidget(QPushButton('Header'), 0, 4)
+        layout.addWidget(QPushButton('Game PGN'), 1, 4)
+
+        self.horizontalGroupBox.setLayout(layout)
+        windowLayout = QVBoxLayout()
+        windowLayout.addWidget(self.horizontalGroupBox)
+        self.setLayout(windowLayout)
+
+        self.margin = 0
         self.pieceToMove = [None, None]
 
         self.square = -10
@@ -44,8 +59,7 @@ class MainWindow(QWidget):
         self.board = chess.Board()
         self.drawBoard()
 
-    @pyqtSlot(QWidget)
-    def mousePressEvent(self, event):
+    def boardMousePressEvent(self, event):
         """
         Handles left mouse clicks and enables moving chess pieces by
         clicking on a chess piece and then the target square.
@@ -53,36 +67,35 @@ class MainWindow(QWidget):
         Moves must be made according to the rules of chess because
         illegal moves are suppressed.
         """
-        if event.x() <= self.boardSize and event.y() <= self.boardSize:
+        board_width = self.widgetSvg.width()/8
+        board_height = self.widgetSvg.height()/8
 
-            if event.buttons() == Qt.LeftButton:
+        file = int((event.x() - self.margin) / board_width)
+        rank = 7 - int((event.y() - self.margin) / board_height)
 
-                if self.margin < event.x() < self.boardSize - self.margin and self.margin < event.y() < self.boardSize - self.margin:
-                    file = int((event.x() - self.margin) / self.squareSize)
-                    rank = 7 - int((event.y() - self.margin) / self.squareSize)
-                    self.square = chess.square(file, rank)
-                    piece = self.board.piece_at(self.square)
+        self.square = chess.square(file, rank)
+        piece = self.board.piece_at(self.square)
 
-                    fileCharacter = chr(file + 97)
-                    rankNumber = str(rank + 1)
-                    ply = "{}{}".format(fileCharacter,
-                                        rankNumber)
+        fileCharacter = chr(file + 97)
+        rankNumber = str(rank + 1)
+        ply = "{}{}".format(fileCharacter,
+                            rankNumber)
 
-                    if self.pieceToMove[0]:
-                        move = chess.Move.from_uci("{}{}".format(self.pieceToMove[1],
-                                                                 ply))
+        if self.pieceToMove[0]:
+            move = chess.Move.from_uci("{}{}".format(self.pieceToMove[1],
+                                                     ply))
 
-                        if move in self.board.legal_moves:
-                            self.board.push(move)
+            if move in self.board.legal_moves:
+                self.board.push(move)
 
-                            self.moveFromSquare = move.from_square
-                            self.moveToSquare = move.to_square
+                self.moveFromSquare = move.from_square
+                self.moveToSquare = move.to_square
 
-                            piece = None
-                            ply = None
+                piece = None
+                ply = None
 
-                    self.pieceToMove = [piece, ply]
-                    self.drawBoard()
+        self.pieceToMove = [piece, ply]
+        self.drawBoard()
 
     def drawBoard(self):
         """
@@ -94,11 +107,9 @@ class MainWindow(QWidget):
         boardSvg = chess.svg.board(board=self.board,
                                    arrows=[(self.square, self.square),
                                            (self.moveFromSquare, self.moveToSquare)],
-                                   check=check)
+                                   check=check, coordinates=False)
         boardSvgEncoded = boardSvg.encode("utf-8")
-        drawBoardSvg = self.widgetSvg.load(boardSvgEncoded)
-
-        return drawBoardSvg
+        self.widgetSvg.load(boardSvgEncoded)
 
 
 def main():
