@@ -17,6 +17,7 @@ from PyQt5.QtCore import QRect, QSize, Qt
 from PyQt5.QtWidgets import (QApplication, QFrame, QLabel, QLayout,
         QTextBrowser, QWidget, QWidgetItem)
 from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtWidgets import QTabBar
 from PyQt5.QtWidgets import QTabWidget
 from PyQt5.QtWidgets import QVBoxLayout
 
@@ -173,6 +174,16 @@ class ChessBoardWidget(QSvgWidget):
         new_size.scale(event.size(), QtCore.Qt.KeepAspectRatio)
         self.resize(new_size)
 
+class ModifiedTabWidget(QTabWidget):
+    def __init__(self):
+        super(ModifiedTabWidget, self).__init__()
+        self.setStyleSheet("""
+
+QTabWidget::tab-bar {
+    top: 8px;
+}
+
+        """)
 
 class MainWindow(QWidget):
     """
@@ -200,7 +211,8 @@ class MainWindow(QWidget):
         layout.addWidget(self.game_pgn, BorderLayout.East)
 
         # Initialize tab screen
-        self.tabs = QTabWidget()
+        self.tabs = ModifiedTabWidget()
+        self.tabBar = QTabBar()
         self.tab1 = QWidget()
         self.tab2 = QWidget()
         self.tab3 = QWidget()
@@ -212,6 +224,9 @@ class MainWindow(QWidget):
         self.tabs.addTab(self.tab1, "Database")
         self.tabs.addTab(self.tab2, "Book")
         self.tabs.addTab(self.tab3, "Engine")
+        # self.tabs.setTabBar(self.tabBar)
+        self.tabs.setTabPosition(QTabWidget.North)
+
 
         # Create first tab
         self.tab1.layout = QVBoxLayout(self)
