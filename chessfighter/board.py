@@ -46,8 +46,8 @@ class Chessboard(utilities.BidirectionalListener, QWidget):
         Moves must be made according to the rules of chess because
         illegal moves are suppressed.
         """
-        board_width = self.svgWidget.width()/8
-        board_height = self.svgWidget.height()/8
+        board_width = self.svgWidget.width() / 8
+        board_height = self.svgWidget.height() / 8
 
         file = int((event.x() - self.margin) / board_width)
         rank = 7 - int((event.y() - self.margin) / board_height)
@@ -109,6 +109,4 @@ class Chessboard(utilities.BidirectionalListener, QWidget):
         # maintaining aspect ratio.
         new_size = QSize(10, 10)
         new_size.scale(event.size(), Qt.KeepAspectRatio)
-        self.svgWidget.resize(new_size*0.95)
-
-
+        self.svgWidget.resize(new_size * 0.95)
