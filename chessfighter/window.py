@@ -14,15 +14,14 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
 
-        self.textEdit = QTextEdit()
-        # self.setCentralWidget(self.textEdit)
-
         self.setWindowTitle("Chess Fighter 1.0")
         self.setGeometry(100, 100, 800, 700)
         self.setMinimumSize(400, 200)
 
+        self.board_dock = QDockWidget("Board", self)
         self.board = Chessboard()
-        self.setCentralWidget(self.board)
+        self.board_dock.setWidget(self.board)
+        self.setCentralWidget(self.board_dock)
 
         self.createActions()
         self.createMenus()
@@ -135,8 +134,8 @@ class MainWindow(QMainWindow):
         dock = QDockWidget("Game", self)
         dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
         self.gamePane = QListWidget(dock)
-
         dock.setWidget(self.gamePane)
+
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
         self.viewMenu.addAction(dock.toggleViewAction())
 

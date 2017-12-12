@@ -4,10 +4,9 @@ Docstring.
 import chess
 import chess.svg
 
-from PyQt5.QtCore import pyqtSlot
+from PyQt5.QtCore import pyqtSlot, QRect, QSize, Qt
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QWidget
-
 
 class Chessboard(QWidget):
     """
@@ -39,3 +38,13 @@ class Chessboard(QWidget):
         self.svgWidget.setGeometry(10, 10, 400, 400)
 
         return self.svgWidget.load(self.svgChessboardEncoded)
+
+    def resizeEvent(self, event):
+        # super().__init__()
+        # Create a square base size of 10x10 and scale it to the new size
+        # maintaining aspect ratio.
+        new_size = QSize(10, 10)
+        new_size.scale(event.size(), Qt.KeepAspectRatio)
+        self.svgWidget.resize(new_size*0.95)
+
+
