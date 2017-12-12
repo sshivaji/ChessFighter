@@ -8,6 +8,9 @@ from PyQt5.QtWidgets import (QAction, QApplication, QDialog, QDockWidget,
         QFileDialog, QListWidget, QMainWindow, QMessageBox, QTextEdit)
 
 from board import Chessboard
+from chess_game import ChessGameWidget
+import copy
+import queue
 import sys
 
 class MainWindow(QMainWindow):
@@ -19,7 +22,7 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(400, 200)
 
         self.board_dock = QDockWidget("Board", self)
-        self.board = Chessboard()
+        self.board = Chessboard(self.send_event)
         self.board_dock.setWidget(self.board)
         self.setCentralWidget(self.board_dock)
 
@@ -29,6 +32,7 @@ class MainWindow(QMainWindow):
         self.createStatusBar()
         self.createDockWindows()
 
+        self.event_q = queue.Queue()
         self.setWindowTitle("Chess Fighter")
 
     def print_(self):
@@ -130,10 +134,17 @@ class MainWindow(QMainWindow):
     def createStatusBar(self):
         self.statusBar().showMessage("Ready")
 
+    def send_event(self, e):
+        for l in self.bidi_listeners:
+            l()(e)
+
     def createDockWindows(self):
         dock = QDockWidget("Game", self)
         dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
-        self.gamePane = QListWidget(dock)
+        self.gamePane = ChessGameWidget(dock, self.send_event)
+
+        self.bidi_listeners = [self.gamePane.register_listener, self.board.register_listener]
+
         dock.setWidget(self.gamePane)
 
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
