@@ -33,7 +33,7 @@ class Chessboard(QWidget):
         """
         Docstring.
         """
-        self.svgChessboard = chess.svg.board(board=self.chessboard)
+        self.svgChessboard = chess.svg.board(board=self.chessboard, coordinates=False)
         self.svgChessboardEncoded = self.svgChessboard.encode("utf-8")
         self.svgWidget = QSvgWidget(parent=self)
         self.svgWidget.setGeometry(10, 10, 400, 400)
