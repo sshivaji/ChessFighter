@@ -120,21 +120,21 @@ class MainWindow(QMainWindow):
                                        shortcut=QKeySequence.New,
                                        statusTip="Start a new game.")
 
-        self.saveAction = QAction(QIcon("images/save.png"),
+        self.saveAction = QAction(QIcon("images/save.svg"),
                                   "&Save...",
                                   self,
                                   shortcut=QKeySequence.Save,
                                   statusTip="Save the current game.",
                                   triggered=self.save)
 
-        self.printAction = QAction(QIcon("images/print.png"),
+        self.printAction = QAction(QIcon("images/print.svg"),
                                    "&Print...",
                                    self,
                                    shortcut=QKeySequence.Print,
                                    statusTip="Print the current game.",
                                    triggered=self.printing)
 
-        self.undoAction = QAction(QIcon("images/undo.png"),
+        self.undoAction = QAction(QIcon("images/undo.svg"),
                                   "&Undo",
                                   self,
                                   shortcut=QKeySequence.Undo,
