@@ -15,5 +15,5 @@ if [ ! -f bases/famous_games.scout ]; then
 fi
 
 if [ ! -f bases/millionbase.db ]; then
-        ./chesspython/bin/python scripts/chess_db.py -i bases/millionbase.headers.json -o bases/millionbase.db
+        ./chessenv/bin/python scripts/chess_db.py -i bases/millionbase.headers.json -o bases/millionbase.db
 fi
