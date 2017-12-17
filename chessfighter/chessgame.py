@@ -3,20 +3,13 @@ Docstring.
 """
 import chess
 
-from PyQt5.QtWidgets import QAction
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtWidgets import QDialog
-from PyQt5.QtWidgets import QDockWidget
-from PyQt5.QtWidgets import QFileDialog
-from PyQt5.QtWidgets import QListWidget
-from PyQt5.QtWidgets import QMainWindow
-from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtWidgets import QTextEdit
 
+from PyQt5.QtWidgets import QTextBrowser
+from PyQt5 import QtGui
 from utilities import BidirectionalListener
 
 
-class ChessGameWidget(BidirectionalListener, QListWidget):
+class ChessGameWidget(BidirectionalListener, QTextBrowser):
     """
     Docstring.
     """
@@ -30,6 +23,7 @@ class ChessGameWidget(BidirectionalListener, QListWidget):
 
         self.game = chess.pgn.Game()
         self.currentGame = self.game
+        self.setReadOnly = False
 
     def processEvent(self, event):
         """
@@ -41,5 +35,9 @@ class ChessGameWidget(BidirectionalListener, QListWidget):
             if event["Move"]:
                 move = event["Move"]
                 self.currentGame = self.currentGame.add_variation(move)
-                # print("move: {}".format(move))
-                self.addItem(str(move))
+
+                exporter = chess.pgn.StringExporter(headers=True, variations=True, comments=True)
+                pgn_string = self.game.accept(exporter)
+                self.setText(pgn_string)
+                self.moveCursor(QtGui.QTextCursor.End)
+
