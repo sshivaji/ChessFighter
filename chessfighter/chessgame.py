@@ -20,22 +20,26 @@ class ChessGameWidget(BidirectionalListener, QListWidget):
     """
     Docstring.
     """
-    def __init__(self, parent, dock):
+    def __init__(self, dock, parent):
         """
         Docstring.
         """
         super(ChessGameWidget, self).__init__()
 
-        #self.parent = parent
+        self.parent = parent
 
         self.game = chess.pgn.Game()
         self.currentGame = self.game
 
-    def process_event(self, event):
+    def processEvent(self, event):
         """
         Docstring.
+        Processes an event, ignores events coming from this class
         """
-        if event["Move"]:
-            move = event["Move"]
-        self.currentGame = self.currentGame.add_variation(move)
-        self.addItem(str(move))
+
+        if event["Origin"] is not self.__class__:
+            if event["Move"]:
+                move = event["Move"]
+                self.currentGame = self.currentGame.add_variation(move)
+                # print("move: {}".format(move))
+                self.addItem(str(move))

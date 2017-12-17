@@ -49,10 +49,10 @@ class Chessboard(BidirectionalListener, QWidget):
 
     def processEvent(self, event):
         """
-        Docstring.
+        Processes an event, ignores events coming from this class
         """
-        # TODO: Override this.
-        pass
+        if event["Origin"] is not self.__class__:
+            print("event: {}".format(event))
 
     def mouseEvent(self, event):
         """
@@ -91,7 +91,7 @@ class Chessboard(BidirectionalListener, QWidget):
             if move in self.chessboard.legal_moves:
                 self.chessboard.push(move)
 
-                pieceEvent = {"Move": move}
+                pieceEvent = {"Move": move, "Origin": self.__class__}
                 self.parent(pieceEvent)
 
                 self.moveFromSquare = move.from_square

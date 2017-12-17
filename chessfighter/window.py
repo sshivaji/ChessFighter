@@ -203,7 +203,6 @@ class MainWindow(QMainWindow):
         """
         for listener in self.bidirectionalListeners:
             listener()(event)
-
     def createDockWindows(self):
         """
         Docstring.
