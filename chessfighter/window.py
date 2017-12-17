@@ -58,14 +58,14 @@ class MainWindow(QMainWindow):
         """
         Docstring.
         """
-        document = self.textEdit.document()
+        document = self.gamePane.document()
         printer = QPrinter()
 
         dialog = QPrintDialog(printer, self)
         if dialog.exec() != QDialog.Accepted:
             return
 
-        document.printing(printer)
+        document.print(printer)
 
         self.statusBar().showMessage("Ready.", 2000)
 
@@ -73,7 +73,7 @@ class MainWindow(QMainWindow):
         """
         Docstring.
         """
-        filename = QFileDialog.getSaveFileName(self,
+        filename, _ = QFileDialog.getSaveFileName(self,
                                                "Choose a filename",
                                                ".",
                                                "PGN (*.pgn)")
@@ -90,7 +90,7 @@ class MainWindow(QMainWindow):
 
         out = QTextStream(file)
         QApplication.setOverrideCursor(Qt.WaitCursor)
-        out << self.textEdit.toHtml()
+        out << self.gamePane.toHtml()
         QApplication.restoreOverrideCursor()
 
         self.statusBar().showMessage("Saved: {}".format(filename), 2000)
@@ -99,8 +99,14 @@ class MainWindow(QMainWindow):
         """
         Docstring.
         """
-        document = self.textEdit.document()
-        document.undo()
+        # document = self.gamePane
+        # document.undo()
+
+        for l in self.bidirectionalListeners:
+            event = {"Action": "Undo", "Origin": self.__class__}
+            # self.parent(event)
+            l()(event)
+
 
     def aboutChessFighter(self):
         """

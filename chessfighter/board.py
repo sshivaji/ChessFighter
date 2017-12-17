@@ -34,11 +34,12 @@ class Chessboard(BidirectionalListener, QWidget):
         self.moveToSquare = -10
         self.square = -10
 
-        self.margin = 0.05
+        self.margin = 0
         self.pieceToMove = [None, None]
 
         self.chessboard = chess.Board()
         self.drawChessboard()
+        self.svgWidget.mouseReleaseEvent = self.mouseEvent
 
     def registerListener(self):
         """
@@ -48,13 +49,19 @@ class Chessboard(BidirectionalListener, QWidget):
 
     def processEvent(self, event):
         """
-        Docstring.
+        Processes an event, ignores events coming from this class
         """
-        # TODO: Override this.
-        pass
+        if event["Origin"] is not self.__class__:
+            if event["Action"]:
+                if event["Action"] == "Undo":
+                    self.undo()
 
-    @pyqtSlot(QWidget)
-    def mouseReleaseEvent(self, event):
+
+    def undo(self):
+        self.chessboard.pop()
+        self.drawChessboard()
+
+    def mouseEvent(self, event):
         """
         Docstring.
         """
@@ -91,7 +98,7 @@ class Chessboard(BidirectionalListener, QWidget):
             if move in self.chessboard.legal_moves:
                 self.chessboard.push(move)
 
-                pieceEvent = {"Move": move}
+                pieceEvent = {"Move": move, "Origin": self.__class__}
                 self.parent(pieceEvent)
 
                 self.moveFromSquare = move.from_square
@@ -112,7 +119,7 @@ class Chessboard(BidirectionalListener, QWidget):
                                              arrows=[(self.square, self.square),
                                                      (self.moveFromSquare, self.moveToSquare)],
                                              check=check,
-                                             coordinates=True)
+                                             coordinates=False)
         self.svgChessboardEncoded = self.svgChessboard.encode("utf-8")
         self.svgWidget.load(self.svgChessboardEncoded)
 

@@ -30,8 +30,3 @@ class BidirectionalListener(object):
         # TODO: Override this.
         pass
 
-    def sendToParent(self, event):
-        """
-        Docstring.
-        """
-        self.sendEvent(event)
