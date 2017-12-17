@@ -99,8 +99,14 @@ class MainWindow(QMainWindow):
         """
         Docstring.
         """
-        document = self.textEdit.document()
-        document.undo()
+        # document = self.gamePane
+        # document.undo()
+
+        for l in self.bidirectionalListeners:
+            event = {"Action": "Undo", "Origin": self.__class__}
+            # self.parent(event)
+            l()(event)
+
 
     def aboutChessFighter(self):
         """
@@ -203,6 +209,7 @@ class MainWindow(QMainWindow):
         """
         for listener in self.bidirectionalListeners:
             listener()(event)
+
     def createDockWindows(self):
         """
         Docstring.

@@ -52,7 +52,14 @@ class Chessboard(BidirectionalListener, QWidget):
         Processes an event, ignores events coming from this class
         """
         if event["Origin"] is not self.__class__:
-            print("event: {}".format(event))
+            if event["Action"]:
+                if event["Action"] == "Undo":
+                    self.undo()
+
+
+    def undo(self):
+        self.chessboard.pop()
+        self.drawChessboard()
 
     def mouseEvent(self, event):
         """

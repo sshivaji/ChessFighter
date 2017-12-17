@@ -30,14 +30,23 @@ class ChessGameWidget(BidirectionalListener, QTextBrowser):
         Docstring.
         Processes an event, ignores events coming from this class
         """
-
         if event["Origin"] is not self.__class__:
-            if event["Move"]:
+            if "Move" in event:
                 move = event["Move"]
                 self.currentGame = self.currentGame.add_variation(move)
+                self.updatePgn()
+            elif "Action" in event:
+                if event["Action"] == "Undo":
+                    self.undo()
 
-                exporter = chess.pgn.StringExporter(headers=True, variations=True, comments=True)
-                pgn_string = self.game.accept(exporter)
-                self.setText(pgn_string)
-                self.moveCursor(QtGui.QTextCursor.End)
+    def updatePgn(self):
+        exporter = chess.pgn.StringExporter(headers=True, variations=True, comments=True)
+        pgn_string = self.game.accept(exporter)
+        # print("pgn: {}".format(pgn_string))
+        self.setText(pgn_string)
+        self.moveCursor(QtGui.QTextCursor.End)
 
+    def undo(self):
+        if self.currentGame.parent:
+            self.currentGame = self.currentGame.parent
+            self.updatePgn()
