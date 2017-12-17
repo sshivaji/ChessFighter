@@ -34,11 +34,12 @@ class Chessboard(BidirectionalListener, QWidget):
         self.moveToSquare = -10
         self.square = -10
 
-        self.margin = 0.05
+        self.margin = 0
         self.pieceToMove = [None, None]
 
         self.chessboard = chess.Board()
         self.drawChessboard()
+        self.svgWidget.mouseReleaseEvent = self.mouseEvent
 
     def registerListener(self):
         """
@@ -53,8 +54,7 @@ class Chessboard(BidirectionalListener, QWidget):
         # TODO: Override this.
         pass
 
-    @pyqtSlot(QWidget)
-    def mouseReleaseEvent(self, event):
+    def mouseEvent(self, event):
         """
         Docstring.
         """
@@ -112,7 +112,7 @@ class Chessboard(BidirectionalListener, QWidget):
                                              arrows=[(self.square, self.square),
                                                      (self.moveFromSquare, self.moveToSquare)],
                                              check=check,
-                                             coordinates=True)
+                                             coordinates=False)
         self.svgChessboardEncoded = self.svgChessboard.encode("utf-8")
         self.svgWidget.load(self.svgChessboardEncoded)
 

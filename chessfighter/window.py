@@ -73,7 +73,7 @@ class MainWindow(QMainWindow):
         """
         Docstring.
         """
-        filename = QFileDialog.getSaveFileName(self,
+        filename, _ = QFileDialog.getSaveFileName(self,
                                                "Choose a filename",
                                                ".",
                                                "PGN (*.pgn)")

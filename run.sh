@@ -4,4 +4,6 @@ if [ ! -d "chessenv" ]; then
     virtualenv -ppython3 chessenv
 fi
 ./chessenv/bin/pip install -r requirements.txt
-./chessenv/bin/python chessfighter/run.py
+cd chessfighter
+../chessenv/bin/python run.py
+cd ..
