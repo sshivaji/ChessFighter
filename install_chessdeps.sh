@@ -24,3 +24,5 @@ fi
 cd pgnextractor;git pull; cd ..
 cd pgnextractor/parser;make build ARCH=x86-64; cd ../..
 cp pgnextractor/parser/pgnextractor ./external
+
+cd chessfighter;ln -s ../external;cd..

@@ -26,6 +26,7 @@ from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import QTextEdit
 
 from board import Chessboard
+from book import OpeningBookWidget
 from chessgame import ChessGameWidget
 
 
@@ -219,24 +220,24 @@ class MainWindow(QMainWindow):
         self.gamePane = ChessGameWidget(parent=self.sendEvent,
                                         dock=dock)
 
-        self.bidirectionalListeners = [self.gamePane.registerListener,
-                                       self.board.registerListener]
-
         dock.setWidget(self.gamePane)
 
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
         self.viewMenu.addAction(dock.toggleViewAction())
 
         dock = QDockWidget("Engine", self)
-        self.outputPane = QListWidget(dock)
+        self.outputPane = OpeningBookWidget(parent=self.sendEvent, dock=dock)
 
         dock.setWidget(self.outputPane)
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
         self.viewMenu.addAction(dock.toggleViewAction())
 
         dock = QDockWidget("Database", self)
-        self.outputPane = QListWidget(dock)
+        self.DBPane = QListWidget(dock)
 
-        dock.setWidget(self.outputPane)
+        dock.setWidget(self.DBPane)
         self.addDockWidget(Qt.BottomDockWidgetArea, dock)
         self.viewMenu.addAction(dock.toggleViewAction())
+
+        self.bidirectionalListeners = [self.gamePane.registerListener,
+                                       self.board.registerListener, self.outputPane.registerListener]

@@ -52,10 +52,9 @@ class Chessboard(BidirectionalListener, QWidget):
         Processes an event, ignores events coming from this class
         """
         if event["Origin"] is not self.__class__:
-            if event["Action"]:
+            if "Action" in event:
                 if event["Action"] == "Undo":
                     self.undo()
-
 
     def undo(self):
         self.chessboard.pop()
@@ -98,7 +97,7 @@ class Chessboard(BidirectionalListener, QWidget):
             if move in self.chessboard.legal_moves:
                 self.chessboard.push(move)
 
-                pieceEvent = {"Move": move, "Origin": self.__class__}
+                pieceEvent = {"Move": move, "Fen": self.chessboard.fen(), "Origin": self.__class__}
                 self.parent(pieceEvent)
 
                 self.moveFromSquare = move.from_square
