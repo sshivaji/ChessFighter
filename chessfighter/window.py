@@ -241,3 +241,8 @@ class MainWindow(QMainWindow):
 
         self.bidirectionalListeners = [self.gamePane.registerListener,
                                        self.board.registerListener, self.outputPane.registerListener]
+
+        for l in self.bidirectionalListeners:
+            event = {"Action": "Game Start", "Fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "Origin": self.__class__}
+            # self.parent(event)
+            l()(event)

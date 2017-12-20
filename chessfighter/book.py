@@ -11,6 +11,7 @@ from utilities import BidirectionalListener
 CHESSDB_EXEC = '../external/parser'
 MILLIONBASE_PGN = '../bases/millionbase.pgn'
 
+
 class OpeningBookWidget(BidirectionalListener, QTableWidget):
     """
     Docstring.
