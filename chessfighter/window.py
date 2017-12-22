@@ -29,6 +29,11 @@ from board import Chessboard
 from book import OpeningBookWidget
 from chessgame import ChessGameWidget
 
+from database import DatabaseWidget
+from external import chess_db
+
+
+CHESSDB_EXEC = '../external/parser'
 
 class MainWindow(QMainWindow):
     """
@@ -41,9 +46,11 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
 
         self.setWindowTitle("Chess Fighter 1.0")
-        self.setGeometry(100, 100, 800, 700)
+        # self.showFullScreen()
+        self.setGeometry(100, 100, 800, 800)
         self.setMinimumSize(400, 200)
 
+        self.chessDB = chess_db.Parser(CHESSDB_EXEC)
         self.boardDock = QDockWidget("Board", self)
         self.board = Chessboard(self.sendEvent)
         self.boardDock.setWidget(self.board)
@@ -54,6 +61,7 @@ class MainWindow(QMainWindow):
         self.createMenus()
         self.createDockWindows()
         self.createStatusBar()
+
 
     def printing(self):
         """
@@ -226,21 +234,21 @@ class MainWindow(QMainWindow):
         self.viewMenu.addAction(dock.toggleViewAction())
 
         dock = QDockWidget("Engine", self)
-        self.outputPane = OpeningBookWidget(parent=self.sendEvent, dock=dock)
+        self.outputPane = OpeningBookWidget(parent=self.sendEvent, dock=dock, db=self.chessDB)
 
         dock.setWidget(self.outputPane)
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
         self.viewMenu.addAction(dock.toggleViewAction())
 
         dock = QDockWidget("Database", self)
-        self.DBPane = QListWidget(dock)
+        self.DBPane = DatabaseWidget(parent=self.sendEvent, dock=dock, db=self.chessDB)
 
         dock.setWidget(self.DBPane)
         self.addDockWidget(Qt.BottomDockWidgetArea, dock)
         self.viewMenu.addAction(dock.toggleViewAction())
 
         self.bidirectionalListeners = [self.gamePane.registerListener,
-                                       self.board.registerListener, self.outputPane.registerListener]
+                                       self.board.registerListener, self.outputPane.registerListener, self.DBPane.registerListener]
 
         for l in self.bidirectionalListeners:
             event = {"Action": "Game Start", "Fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "Origin": self.__class__}

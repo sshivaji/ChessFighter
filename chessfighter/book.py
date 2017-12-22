@@ -2,10 +2,8 @@
 Docstring.
 """
 import chess
-from PyQt5.QtWidgets import QTextBrowser
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 from PyQt5 import QtGui
-from external import chess_db
 from utilities import BidirectionalListener
 
 CHESSDB_EXEC = '../external/parser'
@@ -16,13 +14,16 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
     """
     Docstring.
     """
-    def __init__(self, dock, parent):
+    def __init__(self, dock, parent, db=None):
         """
         Docstring.
         """
         super(OpeningBookWidget, self).__init__()
         self.parent = parent
-        self.chessDB = chess_db.Parser(CHESSDB_EXEC)
+        self.chessDB = db
+        self.setMinimumSize(300, 150)
+        self.setSortingEnabled(True)
+
 
     def query_db(self, fen, limit=100, skip=0):
         records = []
