@@ -35,8 +35,11 @@ class DatabaseWidget(BidirectionalListener, QTableWidget):
             for m in results['moves']:
                 # print(m)
                 m['san'] = board.san(chess.Move.from_uci(m['move']))
-                record = {'move': m['san'], 'pct': "{0:.2f}".format(
-                    (m['wins'] + m['draws'] * 0.5) * 100.0 / (m['wins'] + m['draws'] + m['losses'])), 'freq': m['games'],
+
+                record = {'move': m['san'],
+                          'pct': "{0:.2f}".format(
+                            (m['wins'] + m['draws'] * 0.5) * 100.0 / (m['wins'] + m['draws'] + m['losses'])),
+                          'freq': m['games'],
                           'wins': m['wins'],
                           'draws': m['draws'], 'losses': m['losses'], 'games': int(m['games']),
                           'pgn offsets': m['pgn offsets']}

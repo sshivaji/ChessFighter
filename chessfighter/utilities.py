@@ -1,6 +1,24 @@
+import math
+
+
 """
 Docstring.
 """
+
+def num_fmt(num):
+    i_offset = 15 # change this if you extend the symbols!!!
+    prec = 3
+    fmt = '.{p}g'.format(p=prec)
+    symbols = ['Y', 'T', 'G', 'M', 'k', '', 'm', 'u', 'n']
+
+    e = math.log10(abs(num))
+    if e >= i_offset + 3:
+        return '{:{fmt}}'.format(num, fmt=fmt)
+    for i, sym in enumerate(symbols):
+        e_thresh = i_offset - 3 * i
+        if e >= e_thresh:
+            return '{:{fmt}}{sym}'.format(num/10.**e_thresh, fmt=fmt, sym=sym)
+    return '{:{fmt}}'.format(num, fmt=fmt)
 
 
 class BidirectionalListener(object):

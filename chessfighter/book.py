@@ -5,6 +5,7 @@ import chess
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 from PyQt5 import QtGui
 from utilities import BidirectionalListener
+import utilities
 
 CHESSDB_EXEC = '../external/parser'
 MILLIONBASE_PGN = '../bases/millionbase.pgn'
@@ -21,7 +22,7 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
         super(OpeningBookWidget, self).__init__()
         self.parent = parent
         self.chessDB = db
-        self.setMinimumSize(300, 150)
+        self.setMinimumSize(500, 150)
         self.setSortingEnabled(True)
 
 
@@ -36,9 +37,12 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
                 # print(m)
                 m['san'] = board.san(chess.Move.from_uci(m['move']))
                 record = {'move': m['san'], 'pct': "{0:.2f}".format(
-                    (m['wins'] + m['draws'] * 0.5) * 100.0 / (m['wins'] + m['draws'] + m['losses'])), 'freq': m['games'],
-                          'wins': m['wins'],
-                          'draws': m['draws'], 'losses': m['losses'], 'games': int(m['games']),
+                    (m['wins'] + m['draws'] * 0.5) * 100.0 / (m['wins'] + m['draws'] + m['losses'])),
+                          'freq': utilities.num_fmt(m['games']),
+                          'wins': utilities.num_fmt(m['wins']),
+                          'draws': utilities.num_fmt(m['draws']),
+                          'losses': utilities.num_fmt(m['losses']),
+                          'games': utilities.num_fmt(m['games']),
                           'pgn offsets': m['pgn offsets']}
                 records.append(record)
             return records

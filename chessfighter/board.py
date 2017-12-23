@@ -28,7 +28,6 @@ class Chessboard(BidirectionalListener, QWidget):
         self.parent = parent
 
         self.svgWidget = QSvgWidget(parent=self)
-        self.svgWidget.setGeometry(10, 10, 400, 400)
 
         self.moveFromSquare = -10
         self.moveToSquare = -10
