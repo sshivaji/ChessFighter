@@ -11,6 +11,9 @@ def num_fmt(num):
     fmt = '.{p}g'.format(p=prec)
     symbols = ['Y', 'T', 'G', 'M', 'k', '', 'm', 'u', 'n']
 
+    if num == 0:
+        return num
+
     e = math.log10(abs(num))
     if e >= i_offset + 3:
         return '{:{fmt}}'.format(num, fmt=fmt)
