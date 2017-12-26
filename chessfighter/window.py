@@ -240,10 +240,11 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
         self.viewMenu.addAction(dock.toggleViewAction())
 
-        dock = QDockWidget("Database", self)
-        self.DBPane = DatabaseWidget(parent=self.sendEvent, dock=dock, db=self.chessDB)
+        dock = DatabaseWidget("Database", self, parent=self.sendEvent, db=self.chessDB)
+        # self.DBPane = DatabaseWidget(parent=self.sendEvent, dock=dock, db=self.chessDB)
+        self.DBPane = dock
 
-        dock.setWidget(self.DBPane)
+        # dock.setWidget(self.DBPane)
         self.addDockWidget(Qt.BottomDockWidgetArea, dock)
         self.viewMenu.addAction(dock.toggleViewAction())
 

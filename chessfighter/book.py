@@ -65,6 +65,7 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
                 # print("results: {}".format(results))
                 self.setRowCount(5)
                 self.setColumnCount(5)
+                self.clear()
 
                 headers = ["move", "freq", "pct", "draws", "games"]
                 self.setHorizontalHeaderLabels(headers)
