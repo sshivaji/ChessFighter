@@ -35,9 +35,22 @@ class ChessGameWidget(BidirectionalListener, QTextBrowser):
                 move = event["Move"]
                 self.currentGame = self.currentGame.add_variation(move)
                 self.updatePgn()
+            elif "SAN" in event:
+                san = event["SAN"]
+                move = self.currentGame.board().parse_san(san)
+                print("move: {}".format(move))
+                self.currentGame = self.currentGame.add_variation(move)
+                self.updatePgn()
+
+                pieceEvent = {"Fen": self.currentGame.board().fen(), "Origin": self.__class__}
+                self.parent(pieceEvent)
             elif "Action" in event:
                 if event["Action"] == "Undo":
+                    # print("got Undo")
                     self.undo()
+                    board = self.currentGame.board()
+                    pieceEvent = {"Fen": board.fen(), "Origin": self.__class__}
+                    self.parent(pieceEvent)
 
     def updatePgn(self):
         exporter = chess.pgn.StringExporter(headers=True, variations=True, comments=True)

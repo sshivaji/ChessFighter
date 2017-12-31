@@ -3,9 +3,11 @@ Docstring.
 """
 import chess
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
-from PyQt5 import QtGui
+from PyQt5 import QtGui, QtCore
 from utilities import BidirectionalListener
 import utilities
+
+MOVE_COLUMN = "move"
 
 CHESSDB_EXEC = '../external/parser'
 MILLIONBASE_PGN = '../bases/millionbase.pgn'
@@ -24,7 +26,15 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
         self.chessDB = db
         self.setMinimumSize(500, 150)
         self.setSortingEnabled(True)
+        self.cellClicked.connect(self.cell_was_clicked)
+        self.headers = [MOVE_COLUMN, "freq", "pct", "draws", "games"]
 
+    def cell_was_clicked(self, row, column):
+        item = self.item(row, column)
+
+        if column == self.headers.index(MOVE_COLUMN):
+            pieceEvent = {"SAN": item.text(), "Origin": self.__class__}
+            self.parent(pieceEvent)
 
     def query_db(self, fen, limit=100, skip=0):
         records = []
@@ -60,20 +70,21 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
             if "Fen" in event:
                 #Process
                 fen = event["Fen"]
-                print("Fen: {}".format(event["Fen"]))
+                print("Book_Fen: {}".format(event["Fen"]))
                 results = self.query_db(fen, limit=1)
                 # print("results: {}".format(results))
                 self.setRowCount(5)
                 self.setColumnCount(5)
                 self.clear()
 
-                headers = ["move", "freq", "pct", "draws", "games"]
-                self.setHorizontalHeaderLabels(headers)
+                self.setHorizontalHeaderLabels(self.headers)
 
                 for i, r in enumerate(results):
-                    for j, h in enumerate(headers):
+                    for j, h in enumerate(self.headers):
                         # print(r[h])
-                        self.setItem(i, j, QTableWidgetItem(str(r[h])))
+                        item = QTableWidgetItem(str(r[h]))
+                        item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
+                        self.setItem(i, j, item)
                     if i>3:
                         break
 
