@@ -3,10 +3,14 @@ Docstring.
 """
 import chess
 
-
 from PyQt5.QtWidgets import QTextBrowser
 from PyQt5 import QtGui
 from utilities import BidirectionalListener
+
+try:
+    from StringIO import StringIO  # Python 2
+except ImportError:
+    from io import StringIO  # Python 3
 
 
 class ChessGameWidget(BidirectionalListener, QTextBrowser):
@@ -41,16 +45,17 @@ class ChessGameWidget(BidirectionalListener, QTextBrowser):
                 print("move: {}".format(move))
                 self.currentGame = self.currentGame.add_variation(move)
                 self.updatePgn()
-
-                pieceEvent = {"Fen": self.currentGame.board().fen(), "Origin": self.__class__}
-                self.parent(pieceEvent)
+                self.parent({"Fen": self.currentGame.board().fen(), "Origin": self.__class__})
             elif "Action" in event:
                 if event["Action"] == "Undo":
                     # print("got Undo")
                     self.undo()
                     board = self.currentGame.board()
-                    pieceEvent = {"Fen": board.fen(), "Origin": self.__class__}
-                    self.parent(pieceEvent)
+                    self.parent({"Fen": board.fen(), "Origin": self.__class__})
+                elif event["Action"] == "Load Game":
+                    pgn = StringIO(event["PGN"][0])
+                    self.game = chess.pgn.read_game(pgn)
+                    self.updatePgn()
 
     def updatePgn(self):
         exporter = chess.pgn.StringExporter(headers=True, variations=True, comments=True)

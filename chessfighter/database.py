@@ -30,10 +30,19 @@ class DatabaseWidget(QDockWidget, BidirectionalListener):
         self.setMinimumSize(300, 150)
         self.view = QTableView()
         self.view.setSortingEnabled(True)
+        self.view.clicked.connect(self.cell_was_clicked)
         self.tableData = DatabaseModel(db)
 
         self.view.setModel(self.tableData)
         self.setWidget(self.view)
+
+    def cell_was_clicked(self, clickedIndex):
+        row = clickedIndex.row()
+        model = clickedIndex.model()
+        # print("load game offset {}".format(model.results[row][-1]))
+        offset = int(model.results[row][-1])
+        # print(self.tableData.chessDB.get_games([offset]))
+        self.parent({"Action": "Load Game", "PGN": self.tableData.chessDB.get_games([offset]), "Origin": self.__class__})
 
     def processEvent(self, event):
         """
@@ -53,7 +62,7 @@ class DatabaseModel(QAbstractTableModel):
 
     def __init__(self, db):
         super(DatabaseModel, self).__init__()
-        self.headers = ["White", "WhiteElo", "Black", "BlackElo", "Result", "Event", "Site", "Date", "Round"]
+        self.headers = ["White", "WhiteElo", "Black", "BlackElo", "Result", "Event", "Site", "Date", "Round", "id"]
 
         self.rowsLoaded = DatabaseModel.ROW_BATCH_COUNT
         self.chessDB = db
@@ -67,10 +76,9 @@ class DatabaseModel(QAbstractTableModel):
 
     def populate_games(self, fen, skip=0, limit=ROW_BATCH_COUNT):
         results = self.get_games(fen, skip=skip, limit=limit)
-        headers = ["White", "WhiteElo", "Black", "BlackElo", "Result", "Event", "Site", "Date", "Round"]
         for i, r in enumerate(results["records"]):
             row = []
-            for j, h in enumerate(headers):
+            for j, h in enumerate(self.headers):
                 try:
                     value = str(r[h])
                 except:

@@ -33,8 +33,7 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
         item = self.item(row, column)
 
         if column == self.headers.index(MOVE_COLUMN):
-            pieceEvent = {"SAN": item.text(), "Origin": self.__class__}
-            self.parent(pieceEvent)
+            self.parent({"SAN": item.text(), "Origin": self.__class__})
 
     def query_db(self, fen, limit=100, skip=0):
         records = []
