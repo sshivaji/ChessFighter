@@ -49,7 +49,7 @@ class DatabaseWidget(QDockWidget, BidirectionalListener):
 
 
 class DatabaseModel(QAbstractTableModel):
-    ROW_BATCH_COUNT = 20
+    ROW_BATCH_COUNT = 50
 
     def __init__(self, db):
         super(DatabaseModel, self).__init__()
@@ -95,7 +95,7 @@ class DatabaseModel(QAbstractTableModel):
 
         itemsToFetch = DatabaseModel.ROW_BATCH_COUNT
         self.skip += itemsToFetch
-        print("Loading {} more results..".format(self.skip))
+        print("Loading {0} more results, total loaded: {1}".format(itemsToFetch, self.skip))
         self.beginInsertRows(QModelIndex(), self.skip, self.skip + itemsToFetch)
         self.populate_games(self.fen, skip=self.skip, limit=itemsToFetch)
 

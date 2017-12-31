@@ -58,6 +58,8 @@ class Chessboard(BidirectionalListener, QWidget):
     def undo(self):
         self.chessboard.pop()
         self.drawChessboard()
+        pieceEvent = {"Fen": self.chessboard.fen(), "Origin": self.__class__}
+        self.parent(pieceEvent)
 
     def mouseEvent(self, event):
         """
