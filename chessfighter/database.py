@@ -95,7 +95,7 @@ class DatabaseModel(QAbstractTableModel):
 
         itemsToFetch = DatabaseModel.ROW_BATCH_COUNT
         self.skip += itemsToFetch
-        print("self.skip: {}".format(self.skip))
+        print("Loading {} more results..".format(self.skip))
         self.beginInsertRows(QModelIndex(), self.skip, self.skip + itemsToFetch)
         self.populate_games(self.fen, skip=self.skip, limit=itemsToFetch)
 
