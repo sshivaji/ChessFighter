@@ -5,17 +5,14 @@ import chess
 import chess.pgn
 import chess.svg
 
-from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtCore import QRect
 from PyQt5.QtCore import QSize
 from PyQt5.QtCore import Qt
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QWidget
 
 from utilities import BidirectionalListener
 
 
-class Chessboard(BidirectionalListener, QWidget):
+class Chessboard(BidirectionalListener, QSvgWidget):
     """
     Docstring.
     """
@@ -24,10 +21,7 @@ class Chessboard(BidirectionalListener, QWidget):
         Docstring.
         """
         super(Chessboard, self).__init__()
-
         self.parent = parent
-
-        self.svgWidget = QSvgWidget(parent=self)
 
         self.moveFromSquare = -10
         self.moveToSquare = -10
@@ -38,7 +32,7 @@ class Chessboard(BidirectionalListener, QWidget):
 
         self.chessboard = chess.Board()
         self.drawChessboard()
-        self.svgWidget.mouseReleaseEvent = self.mouseEvent
+        self.mouseReleaseEvent = self.mouseEvent
 
     def registerListener(self):
         """
@@ -73,8 +67,8 @@ class Chessboard(BidirectionalListener, QWidget):
         """
         Docstring.
         """
-        boardWidth = self.svgWidget.width() / 8
-        boardHeight = self.svgWidget.height() / 8
+        boardWidth = self.width() / 8
+        boardHeight = self.height() / 8
 
         file = int((event.x() - self.margin) / boardWidth)
         rank = 7 - int((event.y() - self.margin) / boardHeight)
@@ -129,7 +123,7 @@ class Chessboard(BidirectionalListener, QWidget):
                                              check=check,
                                              coordinates=False)
         self.svgChessboardEncoded = self.svgChessboard.encode("utf-8")
-        self.svgWidget.load(self.svgChessboardEncoded)
+        self.load(self.svgChessboardEncoded)
 
     def resizeEvent(self, event):
         """
@@ -137,4 +131,5 @@ class Chessboard(BidirectionalListener, QWidget):
         """
         newSize = QSize(10, 10)
         newSize.scale(event.size(), Qt.KeepAspectRatio)
-        self.svgWidget.resize(newSize * 0.95)
+        # print(newSize * 0.95)
+        self.resize(newSize)

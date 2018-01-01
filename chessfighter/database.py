@@ -8,8 +8,6 @@ from PyQt5.QtCore import QAbstractTableModel, QModelIndex
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-
-from PyQt5 import QtGui
 from utilities import BidirectionalListener
 
 CHESSDB_EXEC = '../external/parser'

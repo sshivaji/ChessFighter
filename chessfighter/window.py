@@ -3,16 +3,11 @@ Docstring.
 """
 import sys
 
-from PyQt5.QtCore import QDate
 from PyQt5.QtCore import QFile
 from PyQt5.QtCore import Qt
 from PyQt5.QtCore import QTextStream
-from PyQt5.QtGui import QFont
 from PyQt5.QtGui import QIcon
 from PyQt5.QtGui import QKeySequence
-from PyQt5.QtGui import QTextCharFormat
-from PyQt5.QtGui import QTextCursor
-from PyQt5.QtGui import QTextTableFormat
 from PyQt5.QtPrintSupport import QPrintDialog
 from PyQt5.QtPrintSupport import QPrinter
 from PyQt5.QtWidgets import QAction
@@ -23,7 +18,10 @@ from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtWidgets import QListWidget
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtWidgets import QTextEdit
+from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QWidget
+
+
 
 from board import Chessboard
 from book import OpeningBookWidget
@@ -47,13 +45,19 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Chess Fighter 1.0")
         # self.showFullScreen()
-        self.setGeometry(100, 100, 1000, 1000)
-        self.setMinimumSize(400, 200)
+        # self.setGeometry(100, 100, 1000, 1000)
+        # self.setMinimumSize(400, 200)
 
         self.chessDB = chess_db.Parser(CHESSDB_EXEC)
         self.boardDock = QDockWidget("Board", self)
         self.board = Chessboard(self.sendEvent)
-        self.boardDock.setWidget(self.board)
+
+        board_widget = QWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(self.board)
+        board_widget.setLayout(layout)
+
+        self.boardDock.setWidget(board_widget)
         self.setCentralWidget(self.boardDock)
 
         self.createActions()
