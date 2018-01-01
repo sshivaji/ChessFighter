@@ -120,6 +120,13 @@ class MainWindow(QMainWindow):
             # self.parent(event)
             l()(event)
 
+    def forward(self):
+        # print("forward")
+        for l in self.bidirectionalListeners:
+            event = {"Action": "Forward", "Origin": self.__class__}
+            # self.parent(event)
+            l()(event)
+
 
     def aboutChessFighter(self):
         """
@@ -160,6 +167,13 @@ class MainWindow(QMainWindow):
                                   statusTip="Undo the last move.",
                                   triggered=self.undo)
 
+        self.forwardAction = QAction(QIcon("images/forward.svg"),
+                                  "&Forward",
+                                  self,
+                                  shortcut=QKeySequence.Forward,
+                                  statusTip="Go to the next move",
+                                  triggered=self.forward)
+
         self.quitAction = QAction("&Quit",
                                   self,
                                   shortcut="Ctrl + Q",
@@ -189,6 +203,7 @@ class MainWindow(QMainWindow):
 
         self.editMenu = self.menuBar().addMenu("&Edit")
         self.editMenu.addAction(self.undoAction)
+        self.editMenu.addAction(self.forwardAction)
 
         self.viewMenu = self.menuBar().addMenu("&View")
 
@@ -209,6 +224,8 @@ class MainWindow(QMainWindow):
 
         self.editToolbar = self.addToolBar("Edit")
         self.editToolbar.addAction(self.undoAction)
+        self.editToolbar.addAction(self.forwardAction)
+
 
     def createStatusBar(self):
         """

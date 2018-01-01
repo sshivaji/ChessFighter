@@ -56,6 +56,12 @@ class ChessGameWidget(BidirectionalListener, QTextBrowser):
                     pgn = StringIO(event["PGN"][0])
                     self.game = chess.pgn.read_game(pgn)
                     self.updatePgn()
+                    self.currentGame = self.game
+
+                elif event["Action"] == "Forward":
+                    self.forward()
+                    board = self.currentGame.board()
+                    self.parent({"Fen": board.fen(), "Origin": self.__class__})
 
     def updatePgn(self):
         exporter = chess.pgn.StringExporter(headers=True, variations=True, comments=True)
@@ -67,4 +73,9 @@ class ChessGameWidget(BidirectionalListener, QTextBrowser):
     def undo(self):
         if self.currentGame.parent:
             self.currentGame = self.currentGame.parent
+            self.updatePgn()
+
+    def forward(self):
+        if self.currentGame.variations:
+            self.currentGame = self.currentGame.variations[0]
             self.updatePgn()
