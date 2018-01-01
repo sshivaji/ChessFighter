@@ -45,7 +45,7 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("Chess Fighter 1.0")
         # self.showFullScreen()
-        # self.setGeometry(100, 100, 1000, 1000)
+        self.setGeometry(100, 100, 1000, 1000)
         # self.setMinimumSize(400, 200)
 
         self.chessDB = chess_db.Parser(CHESSDB_EXEC)
