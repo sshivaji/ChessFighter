@@ -93,6 +93,8 @@ class DatabaseModel(QAbstractTableModel):
         return len(self.results)
 
     def canFetchMore(self, index=QModelIndex()):
+        if len(self.results) < DatabaseModel.ROW_BATCH_COUNT:
+            return False
         return True
 
     def fetchMore(self, index=QModelIndex()):
