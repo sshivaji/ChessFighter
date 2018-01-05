@@ -1,3 +1,4 @@
 pyqt5==5.9.2
 python-chess==0.22.0
 pexpect==4.3.1
+qtawesome==0.4.4

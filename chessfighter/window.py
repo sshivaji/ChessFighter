@@ -21,14 +21,14 @@ from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import QVBoxLayout
 from PyQt5.QtWidgets import QWidget
 
-
-
 from board import Chessboard
 from book import OpeningBookWidget
 from chessgame import ChessGameWidget
 
 from database import DatabaseWidget
 from external import chess_db
+
+import qtawesome as qta
 
 
 CHESSDB_EXEC = '../external/parser'
@@ -140,34 +140,34 @@ class MainWindow(QMainWindow):
         """
         Docstring.
         """
-        self.newLetterAction = QAction(QIcon("images/new.svg"),
+        self.newLetterAction = QAction(qta.icon('fa.file'),
                                        "&New Game",
                                        self,
                                        shortcut=QKeySequence.New,
                                        statusTip="Start a new game.")
 
-        self.saveAction = QAction(QIcon("images/save.svg"),
+        self.saveAction = QAction(qta.icon('fa.save'),
                                   "&Save...",
                                   self,
                                   shortcut=QKeySequence.Save,
                                   statusTip="Save the current game.",
                                   triggered=self.save)
 
-        self.printAction = QAction(QIcon("images/print.svg"),
+        self.printAction = QAction(qta.icon('fa.print'),
                                    "&Print...",
                                    self,
                                    shortcut=QKeySequence.Print,
                                    statusTip="Print the current game.",
                                    triggered=self.printing)
 
-        self.undoAction = QAction(QIcon("images/undo.svg"),
+        self.undoAction = QAction(qta.icon('fa.step-backward'),
                                   "&Undo",
                                   self,
                                   shortcut=QKeySequence.Undo,
                                   statusTip="Undo the last move.",
                                   triggered=self.undo)
 
-        self.forwardAction = QAction(QIcon("images/forward.svg"),
+        self.forwardAction = QAction(qta.icon('fa.step-forward'),
                                   "&Forward",
                                   self,
                                   shortcut=QKeySequence.Forward,
