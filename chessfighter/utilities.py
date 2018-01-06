@@ -53,10 +53,11 @@ class BidirectionalListener(object):
 
 
 class CustomQDockWidget(QDockWidget):
-    def __init__(self, a, b):
+    def __init__(self, name, parent):
         """
         Docstring.
         """
         super(CustomQDockWidget, self).__init__()
         self.setFeatures(QDockWidget.DockWidgetFloatable |
                              QDockWidget.DockWidgetMovable)
+        self.setWindowTitle(name)
