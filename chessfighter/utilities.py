@@ -1,5 +1,5 @@
 import math
-
+from PyQt5.QtWidgets import QDockWidget
 
 """
 Docstring.
@@ -51,3 +51,12 @@ class BidirectionalListener(object):
         # TODO: Override this.
         pass
 
+
+class CustomQDockWidget(QDockWidget):
+    def __init__(self, a, b):
+        """
+        Docstring.
+        """
+        super(CustomQDockWidget, self).__init__()
+        self.setFeatures(QDockWidget.DockWidgetFloatable |
+                             QDockWidget.DockWidgetMovable)

@@ -9,12 +9,13 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
 from utilities import BidirectionalListener
+from utilities import CustomQDockWidget
 
 CHESSDB_EXEC = '../external/parser'
 MILLIONBASE_PGN = '../bases/millionbase.pgn'
 
 
-class DatabaseWidget(QDockWidget, BidirectionalListener):
+class DatabaseWidget(CustomQDockWidget, BidirectionalListener):
     """
     Docstring.
     """

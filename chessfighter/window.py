@@ -1,7 +1,7 @@
 """
 Docstring.
 """
-import sys
+from utilities import CustomQDockWidget
 
 from PyQt5.QtCore import QFile
 from PyQt5.QtCore import Qt
@@ -13,7 +13,6 @@ from PyQt5.QtPrintSupport import QPrinter
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtWidgets import QDialog
-from PyQt5.QtWidgets import QDockWidget
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtWidgets import QListWidget
 from PyQt5.QtWidgets import QMainWindow
@@ -49,7 +48,7 @@ class MainWindow(QMainWindow):
         # self.setMinimumSize(400, 200)
 
         self.chessDB = chess_db.Parser(CHESSDB_EXEC)
-        self.boardDock = QDockWidget("Board", self)
+        self.boardDock = CustomQDockWidget("Board", self)
         self.board = Chessboard(self.sendEvent)
 
         board_widget = QWidget()
@@ -244,8 +243,9 @@ class MainWindow(QMainWindow):
         """
         Docstring.
         """
-        dock = QDockWidget("Game", self)
+        dock = CustomQDockWidget("Game", self)
         dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+
         self.gamePane = ChessGameWidget(parent=self.sendEvent,
                                         dock=dock)
 
@@ -254,7 +254,7 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
         self.viewMenu.addAction(dock.toggleViewAction())
 
-        dock = QDockWidget("Engine", self)
+        dock = CustomQDockWidget("Engine", self)
         self.outputPane = OpeningBookWidget(parent=self.sendEvent, dock=dock, db=self.chessDB)
 
         dock.setWidget(self.outputPane)
