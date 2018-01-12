@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import QListWidget
 from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import QVBoxLayout
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QToolBar
 
 from board import Chessboard
 from book import OpeningBookWidget
@@ -28,7 +28,6 @@ from database import DatabaseWidget
 from external import chess_db
 
 import qtawesome as qta
-
 
 CHESSDB_EXEC = '../external/parser'
 
@@ -51,19 +50,32 @@ class MainWindow(QMainWindow):
         self.boardDock = CustomQDockWidget("Board", self)
         self.board = Chessboard(self.sendEvent)
 
-        board_widget = QWidget()
-        layout = QVBoxLayout()
-        layout.addWidget(self.board)
-        board_widget.setLayout(layout)
 
-        self.boardDock.setWidget(board_widget)
-        self.setCentralWidget(self.boardDock)
 
         self.createActions()
         self.createToolBars()
         self.createMenus()
         self.createDockWindows()
         self.createStatusBar()
+
+        board_widget = QWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(self.board)
+        board_controls = QToolBar("Edit")
+
+        board_controls.addAction(self.goToStartAction)
+        board_controls.addAction(self.undoAction)
+        board_controls.addAction(self.forwardAction)
+        board_controls.addAction(self.goToEndAction)
+
+        # layout.setAlignment(Qt.AlignTop)
+        # layout.setAlignment(Qt.AlignCenter)
+        # layout.setAlignment(Qt.AlignRight)
+        board_widget.setLayout(layout)
+        layout.addWidget(board_controls)
+
+        self.boardDock.setWidget(board_widget)
+        self.setCentralWidget(self.boardDock)
 
 
     def printing(self):
@@ -106,6 +118,12 @@ class MainWindow(QMainWindow):
         QApplication.restoreOverrideCursor()
 
         self.statusBar().showMessage("Saved: {}".format(filename), 2000)
+
+    def goToStart(self):
+        pass
+
+    def goToEnd(self):
+        pass
 
     def undo(self):
         """
@@ -166,6 +184,18 @@ class MainWindow(QMainWindow):
                                   statusTip="Undo the last move.",
                                   triggered=self.undo)
 
+        self.goToStartAction = QAction(qta.icon('fa.fast-backward'),
+                                  "&Start",
+                                  self,
+                                  statusTip="Go to the beginning",
+                                  triggered=self.goToStart)
+
+        self.goToEndAction = QAction(qta.icon('fa.fast-forward'),
+                                       "&End",
+                                       self,
+                                       statusTip="Go to the end",
+                                       triggered=self.goToEnd)
+
         self.forwardAction = QAction(qta.icon('fa.step-forward'),
                                   "&Forward",
                                   self,
@@ -221,9 +251,9 @@ class MainWindow(QMainWindow):
         self.fileToolBar.addAction(self.saveAction)
         self.fileToolBar.addAction(self.printAction)
 
-        self.editToolbar = self.addToolBar("Edit")
-        self.editToolbar.addAction(self.undoAction)
-        self.editToolbar.addAction(self.forwardAction)
+        # self.editToolbar = self.addToolBar("Edit")
+        # self.editToolbar.addAction(self.undoAction)
+        # self.editToolbar.addAction(self.forwardAction)
 
 
     def createStatusBar(self):
