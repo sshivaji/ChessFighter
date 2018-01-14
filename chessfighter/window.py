@@ -10,15 +10,8 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtPrintSupport import QPrintDialog
 from PyQt5.QtPrintSupport import QPrinter
-from PyQt5.QtWidgets import QAction
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtWidgets import QDialog
-from PyQt5.QtWidgets import QFileDialog
-from PyQt5.QtWidgets import QListWidget
-from PyQt5.QtWidgets import QMainWindow
-from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtWidgets import QVBoxLayout
-from PyQt5.QtWidgets import QWidget, QToolBar
+from PyQt5.QtWidgets import QFileDialog, QApplication, QDialog
+from PyQt5.QtWidgets import QWidget, QToolBar, QSizePolicy, QVBoxLayout, QMessageBox, QMainWindow, QAction
 
 from board import Chessboard
 from book import OpeningBookWidget
@@ -50,8 +43,6 @@ class MainWindow(QMainWindow):
         self.boardDock = CustomQDockWidget("Board", self)
         self.board = Chessboard(self.sendEvent)
 
-
-
         self.createActions()
         self.createToolBars()
         self.createMenus()
@@ -60,19 +51,26 @@ class MainWindow(QMainWindow):
 
         board_widget = QWidget()
         layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignCenter)
+
         layout.addWidget(self.board)
-        board_controls = QToolBar("Edit")
 
-        board_controls.addAction(self.goToStartAction)
-        board_controls.addAction(self.undoAction)
-        board_controls.addAction(self.forwardAction)
-        board_controls.addAction(self.goToEndAction)
+        # spacer widget for left
+        # left_spacer = QWidget()
+        # left_spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        # spacer widget for right
+        # you can't add the same widget to both left and right. you need two different widgets.
+        # right_spacer = QWidget()
+        # right_spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        # layout.setAlignment(Qt.AlignTop)
-        # layout.setAlignment(Qt.AlignCenter)
-        # layout.setAlignment(Qt.AlignRight)
+        self.board_controls = QToolBar("Edit")
+        # self.board_controls.addWidget(left_spacer)
+        self.board_controls.addAction(self.goToStartAction)
+        self.board_controls.addAction(self.undoAction)
+        self.board_controls.addAction(self.forwardAction)
+        self.board_controls.addAction(self.goToEndAction)
+        layout.addWidget(self.board_controls)
         board_widget.setLayout(layout)
-        layout.addWidget(board_controls)
 
         self.boardDock.setWidget(board_widget)
         self.setCentralWidget(self.boardDock)
