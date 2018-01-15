@@ -10,7 +10,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtPrintSupport import QPrintDialog
 from PyQt5.QtPrintSupport import QPrinter
-from PyQt5.QtWidgets import QFileDialog, QApplication, QDialog
+from PyQt5.QtWidgets import QFileDialog, QApplication, QDialog, QTabWidget
 from PyQt5.QtWidgets import QWidget, QToolBar, QSizePolicy, QVBoxLayout, QMessageBox, QMainWindow, QAction
 
 from board import Chessboard
@@ -283,10 +283,17 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
         self.viewMenu.addAction(dock.toggleViewAction())
 
-        dock = CustomQDockWidget("Engine", self)
+        dock = CustomQDockWidget("", self)
         self.outputPane = OpeningBookWidget(parent=self.sendEvent, dock=dock, db=self.chessDB)
 
-        dock.setWidget(self.outputPane)
+        self.tab_widget = QTabWidget()
+        self.engine_widget = QWidget()
+
+        self.tab_widget.addTab(self.outputPane, "Book")
+        self.tab_widget.addTab(self.engine_widget, "Engine")
+
+
+        dock.setWidget(self.tab_widget)
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
         self.viewMenu.addAction(dock.toggleViewAction())
 
