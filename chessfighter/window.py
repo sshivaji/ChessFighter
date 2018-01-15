@@ -51,7 +51,7 @@ class MainWindow(QMainWindow):
 
         board_widget = QWidget()
         layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignCenter)
+        # layout.setAlignment(Qt.AlignCenter)
 
         layout.addWidget(self.board)
 
@@ -63,13 +63,8 @@ class MainWindow(QMainWindow):
         # right_spacer = QWidget()
         # right_spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-        self.board_controls = QToolBar("Edit")
-        # self.board_controls.addWidget(left_spacer)
-        self.board_controls.addAction(self.goToStartAction)
-        self.board_controls.addAction(self.undoAction)
-        self.board_controls.addAction(self.forwardAction)
-        self.board_controls.addAction(self.goToEndAction)
-        layout.addWidget(self.board_controls)
+
+        # layout.addWidget(self.board_controls)
         board_widget.setLayout(layout)
 
         self.boardDock.setWidget(board_widget)
@@ -228,9 +223,11 @@ class MainWindow(QMainWindow):
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.quitAction)
 
+
         self.editMenu = self.menuBar().addMenu("&Edit")
         self.editMenu.addAction(self.undoAction)
         self.editMenu.addAction(self.forwardAction)
+
 
         self.viewMenu = self.menuBar().addMenu("&View")
 
@@ -249,9 +246,13 @@ class MainWindow(QMainWindow):
         self.fileToolBar.addAction(self.saveAction)
         self.fileToolBar.addAction(self.printAction)
 
-        # self.editToolbar = self.addToolBar("Edit")
-        # self.editToolbar.addAction(self.undoAction)
-        # self.editToolbar.addAction(self.forwardAction)
+        self.editToolbar = self.addToolBar("Edit")
+
+        self.editToolbar.addAction(self.goToStartAction)
+        self.editToolbar.addAction(self.undoAction)
+        self.editToolbar.addAction(self.forwardAction)
+        self.editToolbar.addAction(self.goToEndAction)
+        self.engineToolbar = self.addToolBar("Engine")
 
 
     def createStatusBar(self):
