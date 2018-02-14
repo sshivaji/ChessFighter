@@ -4,8 +4,8 @@ if [ ! -d scoutfish ]; then
 fi
 cd scoutfish;git pull; cd ..
 cd scoutfish/src;make build ARCH=x86-64; cd ../..
-mkdir -p external
-touch external/__init__.py
+#mkdir -p external
+#touch external/__init__.py
 cp scoutfish/src/scoutfish ./external
 cp scoutfish/src/scoutfish.py ./external
 
