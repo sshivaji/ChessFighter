@@ -6,11 +6,15 @@ from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem
 from PyQt5 import QtGui, QtCore
 from utilities import BidirectionalListener
 import utilities
+import json
+from external.ctg_reader import CTGReader
 
 MOVE_COLUMN = "move"
 
 CHESSDB_EXEC = '../external/parser'
 MILLIONBASE_PGN = '../bases/millionbase.pgn'
+
+CHESS_CTG_READER = '../external/ctg_reader'
 
 
 class OpeningBookWidget(BidirectionalListener, QTableWidget):
@@ -40,28 +44,31 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
         records = []
         # selecting DB happens now
         try:
-            c = CTGReader()
+            c = CTGReader(CHESS_CTG_READER)
             c.open(self.filename)
             results = c.find(fen)
-
             # self.chessDB.open(self.filename)
             # results = self.chessDB.find(fen, limit=limit, skip=skip)
             board = chess.Board(fen)
+            # print(results)
+            # print(results)
             for m in results['moves']:
+                # print(m)
+                # m = json.loads(m)
                 # print(m)
                 m['san'] = board.san(chess.Move.from_uci(m['move']))
                 record = {'move': m['san'], 'pct': "{0:.2f}".format(
                     (m['wins'] + m['draws'] * 0.5) * 100.0 / (m['wins'] + m['draws'] + m['losses'])),
-                          'freq': utilities.num_fmt(m['games']),
+                          'freq': utilities.num_fmt(m['avg_games']),
                           'wins': utilities.num_fmt(m['wins']),
                           'draws': utilities.num_fmt(m['draws']),
                           'losses': utilities.num_fmt(m['losses']),
-                          'games': utilities.num_fmt(m['games']),
-                          'pgn offsets': m['pgn offsets']}
+                          'games': utilities.num_fmt(m['avg_games'])}
                 records.append(record)
             return records
         except:
             print("Error loading DB")
+            # raise
             return records
 
 
@@ -72,6 +79,7 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
             self.chessDB.open(self.filename)
             results = self.chessDB.find(fen, limit=limit, skip=skip)
             board = chess.Board(fen)
+            print(results)
             for m in results['moves']:
                 # print(m)
                 m['san'] = board.san(chess.Move.from_uci(m['move']))
@@ -98,12 +106,17 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
             # print("Book: {}".format(event))
 
             if "Book_File" in event:
-                    self.filename = event["Book_File"]
+                self.filename = event["Book_File"]
 
             if "Fen" in event:
                 fen = event["Fen"]
                 print("Book_Fen: {}".format(event["Fen"]))
-                results = self.query_db(fen, limit=1)
+                if self.filename.endswith('ctg'):
+                    print("loading CTG FEN")
+                    results = self.query_ctg_db(fen, limit=1)
+                else:
+                    # print("loading norm")
+                    results = self.query_db(fen, limit=1)
                 # print("results: {}".format(results))
                 self.setRowCount(5)
                 self.setColumnCount(5)

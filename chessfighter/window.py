@@ -112,7 +112,7 @@ class MainWindow(QMainWindow):
 
         self.statusBar().showMessage("Opened Book: {}".format(filename), 2000)
         for l in self.bidirectionalListeners:
-            event = {"Book_File":filename, "Origin": self.__class__}
+            event = {"Book_File": filename, "Origin": self.__class__}
             # self.parent(event)
             l()(event)
             event = {"Action": "Refresh", "Origin": self.__class__}
@@ -193,8 +193,6 @@ class MainWindow(QMainWindow):
         if command.endswith("parser"):
             # change DB
             pass
-
-
 
     def save(self):
         """
