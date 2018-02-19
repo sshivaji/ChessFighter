@@ -48,7 +48,11 @@ class DatabaseWidget(CustomQDockWidget, BidirectionalListener):
         Docstring.
         Processes an event, ignores events coming from this class
         """
+
         if event["Origin"] is not self.__class__:
+            if "DB_File" in event:
+                    self.filename = event["DB_File"]
+
             if "Fen" in event:
                 self.tableData.reset()
                 fen = event["Fen"]

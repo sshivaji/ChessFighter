@@ -52,6 +52,11 @@ class ChessGameWidget(BidirectionalListener, QTextBrowser):
                     self.undo()
                     board = self.currentGame.board()
                     self.parent({"Fen": board.fen(), "Origin": self.__class__})
+
+                elif event["Action"] == "Refresh":
+                    board = self.currentGame.board()
+                    self.parent({"Fen": board.fen(), "Origin": self.__class__})
+
                 elif event["Action"] == "Load Game":
                     pgn = StringIO(event["PGN"][0])
                     self.game = chess.pgn.read_game(pgn)

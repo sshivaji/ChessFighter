@@ -28,6 +28,7 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
         self.setSortingEnabled(True)
         self.cellClicked.connect(self.cell_was_clicked)
         self.headers = [MOVE_COLUMN, "freq", "pct", "draws", "games"]
+        self.filename = MILLIONBASE_PGN
 
     def cell_was_clicked(self, row, column):
         item = self.item(row, column)
@@ -35,11 +36,40 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
         if column == self.headers.index(MOVE_COLUMN):
             self.parent({"SAN": item.text(), "Origin": self.__class__})
 
+    def query_ctg_db(self, fen, limit=100, skip=0):
+        records = []
+        # selecting DB happens now
+        try:
+            c = CTGReader()
+            c.open(self.filename)
+            results = c.find(fen)
+
+            # self.chessDB.open(self.filename)
+            # results = self.chessDB.find(fen, limit=limit, skip=skip)
+            board = chess.Board(fen)
+            for m in results['moves']:
+                # print(m)
+                m['san'] = board.san(chess.Move.from_uci(m['move']))
+                record = {'move': m['san'], 'pct': "{0:.2f}".format(
+                    (m['wins'] + m['draws'] * 0.5) * 100.0 / (m['wins'] + m['draws'] + m['losses'])),
+                          'freq': utilities.num_fmt(m['games']),
+                          'wins': utilities.num_fmt(m['wins']),
+                          'draws': utilities.num_fmt(m['draws']),
+                          'losses': utilities.num_fmt(m['losses']),
+                          'games': utilities.num_fmt(m['games']),
+                          'pgn offsets': m['pgn offsets']}
+                records.append(record)
+            return records
+        except:
+            print("Error loading DB")
+            return records
+
+
     def query_db(self, fen, limit=100, skip=0):
         records = []
         # selecting DB happens now
         try:
-            self.chessDB.open(MILLIONBASE_PGN)
+            self.chessDB.open(self.filename)
             results = self.chessDB.find(fen, limit=limit, skip=skip)
             board = chess.Board(fen)
             for m in results['moves']:
@@ -66,8 +96,11 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
         """
         if event["Origin"] is not self.__class__:
             # print("Book: {}".format(event))
+
+            if "Book_File" in event:
+                    self.filename = event["Book_File"]
+
             if "Fen" in event:
-                #Process
                 fen = event["Fen"]
                 print("Book_Fen: {}".format(event["Fen"]))
                 results = self.query_db(fen, limit=1)

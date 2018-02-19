@@ -41,6 +41,7 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__()
 
         self.setWindowTitle("Chess Fighter 1.0")
+        self.process_list = []
         # self.showFullScreen()
         self.setGeometry(100, 100, 1000, 1000)
         # self.setMinimumSize(400, 200)
@@ -92,6 +93,32 @@ class MainWindow(QMainWindow):
 
         self.statusBar().showMessage("Ready.", 2000)
 
+
+    def openBook(self):
+        filename, _ = QFileDialog.getOpenFileName(self,
+                                                  "Choose a filename",
+                                                  ".",
+                                                  "CTG (*.ctg *.PGN)")
+        if not filename:
+            return
+
+        file = QFile(filename)
+        if not file.open(QFile.ReadOnly | QFile.Text):
+            QMessageBox.warning(self,
+                                "Chess Fighter Error",
+                                "Can't open the file {}:\n{}.".format(filename,
+                                                                       file.errorString()))
+            return
+
+        self.statusBar().showMessage("Opened Book: {}".format(filename), 2000)
+        for l in self.bidirectionalListeners:
+            event = {"Book_File":filename, "Origin": self.__class__}
+            # self.parent(event)
+            l()(event)
+            event = {"Action": "Refresh", "Origin": self.__class__}
+            l()(event)
+
+
     def openDatabase(self):
         filename, _ = QFileDialog.getOpenFileName(self,
                                                   "Choose a filename",
@@ -108,9 +135,6 @@ class MainWindow(QMainWindow):
                                                                        file.errorString()))
             return
 
-        # print(filename)
-        # print(os.getcwd())
-        # print(os.path.dirname(filename))
         # Add the UI components (here we use a QTextEdit to display the stdout from the process)
         self.dialog = QTextEdit()
         self.dialog.setWindowTitle("Opening Database...")
@@ -121,8 +145,6 @@ class MainWindow(QMainWindow):
 
         command = "{0}/external/scoutfish".format(os.getcwd())
         args = ["make", "{}".format(filename)]
-
-        self.process_list = []
 
         # Add the process and start it
         self.setupProcess(command, args)
@@ -251,6 +273,12 @@ class MainWindow(QMainWindow):
                                        statusTip="Open Database",
                                           triggered=self.openDatabase)
 
+        self.openBookAction = QAction(qta.icon('fa.book'),
+                                          "&Open Book",
+                                          self,
+                                          statusTip="Open Book",
+                                          triggered=self.openBook)
+
         self.saveAction = QAction(qta.icon('fa.save'),
                                   "&Save...",
                                   self,
@@ -314,6 +342,8 @@ class MainWindow(QMainWindow):
         self.fileMenu = self.menuBar().addMenu("&File")
         self.fileMenu.addAction(self.newLetterAction)
         self.fileMenu.addAction(self.openDatabaseAction)
+        self.fileMenu.addAction(self.openBookAction)
+
         self.fileMenu.addAction(self.saveAction)
         self.fileMenu.addAction(self.printAction)
         self.fileMenu.addSeparator()
@@ -340,6 +370,7 @@ class MainWindow(QMainWindow):
         self.fileToolBar = self.addToolBar("File")
         self.fileToolBar.addAction(self.newLetterAction)
         self.fileToolBar.addAction(self.openDatabaseAction)
+        self.fileToolBar.addAction(self.openBookAction)
 
         self.fileToolBar.addAction(self.saveAction)
         self.fileToolBar.addAction(self.printAction)
