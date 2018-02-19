@@ -5,13 +5,15 @@ from utilities import CustomQDockWidget
 
 from PyQt5.QtCore import QFile
 from PyQt5.QtCore import Qt
-from PyQt5.QtCore import QTextStream
-from PyQt5.QtGui import QIcon
+from PyQt5.QtCore import QTextStream, QProcess
+from PyQt5.QtCore import pyqtSlot, pyqtSignal
+
 from PyQt5.QtGui import QKeySequence
 from PyQt5.QtPrintSupport import QPrintDialog
 from PyQt5.QtPrintSupport import QPrinter
 from PyQt5.QtWidgets import QFileDialog, QApplication, QDialog, QTabWidget
 from PyQt5.QtWidgets import QWidget, QToolBar, QSizePolicy, QVBoxLayout, QMessageBox, QMainWindow, QAction
+from PyQt5.QtWidgets import QTextEdit, QDialog
 
 from board import Chessboard
 from book import OpeningBookWidget
@@ -21,6 +23,10 @@ from database import DatabaseWidget
 from external import chess_db
 
 import qtawesome as qta
+import os
+from functools import partial
+
+QString = type("")
 
 CHESSDB_EXEC = '../external/parser'
 
@@ -85,6 +91,88 @@ class MainWindow(QMainWindow):
         document.print(printer)
 
         self.statusBar().showMessage("Ready.", 2000)
+
+    def openDatabase(self):
+        filename, _ = QFileDialog.getOpenFileName(self,
+                                                  "Choose a filename",
+                                                  ".",
+                                                  "PGN (*.pgn)")
+        if not filename:
+            return
+
+        file = QFile(filename)
+        if not file.open(QFile.ReadOnly | QFile.Text):
+            QMessageBox.warning(self,
+                                "Chess Fighter Error",
+                                "Can't open the file {}:\n{}.".format(filename,
+                                                                       file.errorString()))
+            return
+
+        # print(filename)
+        # print(os.getcwd())
+        # print(os.path.dirname(filename))
+        # Add the UI components (here we use a QTextEdit to display the stdout from the process)
+        self.dialog = QTextEdit()
+        self.dialog.setWindowTitle("Opening Database...")
+        self.dialog.progress = QTextEdit()
+
+        self.dialog.show()
+        self.statusBar().showMessage("Opened: {}".format(filename), 2000)
+
+        command = "{0}/external/scoutfish".format(os.getcwd())
+        args = ["make", "{}".format(filename)]
+
+        self.process_list = []
+
+        # Add the process and start it
+        self.setupProcess(command, args)
+
+        command = "{0}/external/parser".format(os.getcwd())
+        args = ["book", "{}".format(filename), "full"]
+
+        self.setupProcess(command, args)
+
+        command = "{0}/external/pgnextractor".format(os.getcwd())
+        args = ["headers", "{}".format(filename), "full"]
+
+        self.setupProcess(command, args)
+
+    def setupProcess(self, command, args):
+        process = QProcess()
+        # Set the channels
+        process.setProcessChannelMode(QProcess.MergedChannels)
+        # Connect the signal readyReadStandardOutput to the slot of the widget
+        # process.readyReadStandardOutput.connect(lambda: self.readStdOutput(process))
+        process.readyReadStandardOutput.connect(partial(self.readStdOutput, command, process))
+
+        # Run the process with a given command
+        process.start(command, args)
+        self.process_list.append(process)
+
+    def __del__(self):
+        if self.process_list:
+            for process in self.process_list:
+                # If QApplication is closed attempt to kill the process
+                process.terminate()
+                # Wait for Xms and then elevate the situation to terminate
+                if not process.waitForFinished(10000):
+                    process.kill()
+
+    @pyqtSlot()
+    def readStdOutput(self, command, p):
+        # Every time the process has something to output we attach it to the QTextEdit
+        # print("command: {}".format(command))
+        text = QString(p.readAllStandardOutput())
+        self.dialog.append(text)
+        self.dialog.append("\n")
+        if p in self.process_list:
+            del self.process_list[self.process_list.index(p)]
+
+        if command.endswith("parser"):
+            # change DB
+            pass
+
+
 
     def save(self):
         """
@@ -156,6 +244,13 @@ class MainWindow(QMainWindow):
                                        shortcut=QKeySequence.New,
                                        statusTip="Start a new game.")
 
+        self.openDatabaseAction = QAction(qta.icon('fa.database'),
+                                       "&Open Database",
+                                       self,
+                                       shortcut=QKeySequence.Open,
+                                       statusTip="Open Database",
+                                          triggered=self.openDatabase)
+
         self.saveAction = QAction(qta.icon('fa.save'),
                                   "&Save...",
                                   self,
@@ -218,6 +313,7 @@ class MainWindow(QMainWindow):
         """
         self.fileMenu = self.menuBar().addMenu("&File")
         self.fileMenu.addAction(self.newLetterAction)
+        self.fileMenu.addAction(self.openDatabaseAction)
         self.fileMenu.addAction(self.saveAction)
         self.fileMenu.addAction(self.printAction)
         self.fileMenu.addSeparator()
@@ -243,6 +339,8 @@ class MainWindow(QMainWindow):
         """
         self.fileToolBar = self.addToolBar("File")
         self.fileToolBar.addAction(self.newLetterAction)
+        self.fileToolBar.addAction(self.openDatabaseAction)
+
         self.fileToolBar.addAction(self.saveAction)
         self.fileToolBar.addAction(self.printAction)
 
