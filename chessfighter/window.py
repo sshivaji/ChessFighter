@@ -129,29 +129,51 @@ class MainWindow(QMainWindow):
                                 "Can't open the file {}:\n{}.".format(filename, file.errorString()))
             return
 
-        # Add the UI components (here we use a QTextEdit to display the stdout from the process)
-        self.dialog = QTextEdit()
-        self.dialog.setWindowTitle("Opening Database...")
-        self.dialog.progress = QTextEdit()
 
-        self.dialog.show()
         self.statusBar().showMessage("Opened: {}".format(filename), 2000)
 
-        command = "{0}/external/scoutfish".format(os.getcwd())
-        args = ["make", "{}".format(filename)]
+        # Check to see if indexes are already build for DB:
 
-        # Add the process and start it
-        self.setupProcess(command, args, filename)
+        fname, ext = os.path.splitext(filename)
 
-        command = "{0}/external/parser".format(os.getcwd())
-        args = ["book", "{}".format(filename), "full"]
+        if not os.path.exists(fname+'.scout') or not os.path.exists(fname + '.bin') or not os.path.exists(fname + '.headers.json'):
+            # Add the UI components (here we use a QTextEdit to display the stdout from the process)
+            self.dialog = QTextEdit()
+            self.dialog.setWindowTitle("Opening Database...")
+            self.dialog.progress = QTextEdit()
 
-        self.setupProcess(command, args, filename)
+            self.dialog.show()
 
-        command = "{0}/external/pgnextractor".format(os.getcwd())
-        args = ["headers", "{}".format(filename), "full"]
+        if not os.path.exists(fname+'.scout'):
+            print("Creating Scout DB")
+            command = "{0}/external/scoutfish".format(os.getcwd())
+            args = ["make", "{}".format(filename)]
 
-        self.setupProcess(command, args, filename)
+            # Add the process and start it
+            self.setupProcess(command, args, filename)
+
+        if not os.path.exists(fname + '.bin'):
+            print("Creating .bin DB")
+            command = "{0}/external/parser".format(os.getcwd())
+            args = ["book", "{}".format(filename), "full"]
+
+            self.setupProcess(command, args, filename)
+        else:
+            # Switch to this databse
+            for l in self.bidirectionalListeners:
+                event = {"DB_File": filename, "Origin": self.__class__}
+                # self.parent(event)
+                l()(event)
+                event = {"Book_File": filename, "Origin": self.__class__}
+                # self.parent(event)
+                l()(event)
+
+        if not os.path.exists(fname + '.headers.json'):
+            print("Creating JSON headers")
+            command = "{0}/external/pgnextractor".format(os.getcwd())
+            args = ["headers", "{}".format(filename), "full"]
+
+            self.setupProcess(command, args, filename)
 
     def setupProcess(self, command, args, filename):
         process = QProcess()
