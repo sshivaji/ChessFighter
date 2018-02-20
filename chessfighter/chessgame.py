@@ -47,7 +47,19 @@ class ChessGameWidget(BidirectionalListener, QTextBrowser):
                 self.updatePgn()
                 self.parent({"Fen": self.currentGame.board().fen(), "Origin": self.__class__})
             elif "Action" in event:
-                if event["Action"] == "Undo":
+                if event["Action"] == "Go_To_Start":
+                    # print("got Undo")
+                    self.go_to_start()
+                    board = self.currentGame.board()
+                    self.parent({"Fen": board.fen(), "Origin": self.__class__})
+
+                elif event["Action"] == "Go_To_End":
+                    # print("got Undo")
+                    self.go_to_end()
+                    board = self.currentGame.board()
+                    self.parent({"Fen": board.fen(), "Origin": self.__class__})
+
+                elif event["Action"] == "Undo":
                     # print("got Undo")
                     self.undo()
                     board = self.currentGame.board()
@@ -73,7 +85,6 @@ class ChessGameWidget(BidirectionalListener, QTextBrowser):
                 board = self.currentGame.board()
                 self.parent({"Fen": board.fen(), "Origin": self.__class__})
 
-
     def updatePgn(self):
         exporter = chess.pgn.StringExporter(headers=True, variations=True, comments=True)
         pgn_string = self.game.accept(exporter)
@@ -90,3 +101,15 @@ class ChessGameWidget(BidirectionalListener, QTextBrowser):
         if self.currentGame.variations:
             self.currentGame = self.currentGame.variations[0]
             self.updatePgn()
+
+    def go_to_start(self):
+        while self.currentGame.parent:
+            self.currentGame = self.currentGame.parent
+        self.updatePgn()
+
+    def go_to_end(self):
+        while self.currentGame.variations:
+            self.currentGame = self.currentGame.variations[0]
+        self.updatePgn()
+
+

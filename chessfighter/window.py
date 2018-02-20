@@ -216,10 +216,16 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage("Saved: {}".format(filename), 2000)
 
     def goToStart(self):
-        pass
+        for l in self.bidirectionalListeners:
+            event = {"Action": "Go_To_Start", "Origin": self.__class__}
+            # self.parent(event)
+            l()(event)
 
     def goToEnd(self):
-        pass
+        for l in self.bidirectionalListeners:
+            event = {"Action": "Go_To_End", "Origin": self.__class__}
+            # self.parent(event)
+            l()(event)
 
     def undo(self):
         """

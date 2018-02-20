@@ -51,12 +51,19 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
             for m in results['moves']:
                 m['san'] = board.san(chess.Move.from_uci(m['move']))
                 total = m['wins'] + m['draws'] + m['losses']
-                record = {'move': m['san'], 'pct': "{0:.1f}%".format(
-                    (m['wins'] + m['draws'] * 0.5) * 100.0 / total),
+
+                record = {'move': m['san'],
                           'score': utilities.num_fmt(m['wins'] - m['losses']),
-                          'draws': "{}%".format(utilities.num_fmt(m['draws']/total * 100.0)),
                           'losses': utilities.num_fmt(m['losses']),
                           'games': utilities.num_fmt(total)}
+                if total > 0:
+                    record['pct'] = "{0:.1f}%".format((m['wins'] + m['draws'] * 0.5) * 100.0 / total)
+                    record['draws'] = "{}%".format(utilities.num_fmt(m['draws'] / total * 100.0))
+
+                else:
+                    record['pct'] = 'N/A'
+                    record['draws'] = 'N/A'
+
                 records.append(record)
             return records
         except:
@@ -74,13 +81,20 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
             # print(results)
             for m in results['moves']:
                 m['san'] = board.san(chess.Move.from_uci(m['move']))
-                record = {'move': m['san'], 'pct': "{0:.1f}%".format(
-                    (m['wins'] + m['draws'] * 0.5) * 100.0 / (m['wins'] + m['draws'] + m['losses'])),
+                total = m['wins'] + m['draws'] + m['losses']
+
+                record = {'move': m['san'],
                           'score': utilities.num_fmt(m['wins'] - m['losses']),
-                          'draws': "{}%".format(utilities.num_fmt(m['draws']/m['games'] * 100.0)),
                           'losses': utilities.num_fmt(m['losses']),
                           'games': utilities.num_fmt(m['games']),
                           'pgn offsets': m['pgn offsets']}
+                if total > 0:
+                    record['pct']= "{0:.1f}%".format((m['wins'] + m['draws'] * 0.5) * 100.0 / total)
+                    record['draws'] = "{}%".format(utilities.num_fmt(m['draws'] / total * 100.0))
+                else:
+                    record['pct'] = 'N/A'
+                    record['draws'] = 'N/A'
+
                 records.append(record)
             return records
         except:
@@ -112,7 +126,7 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
                     # print("loading norm")
                     results = self.query_db(self.fen, limit=1)
                 # print("results: {}".format(results))
-                self.setRowCount(5)
+                self.setRowCount(10)
                 self.setColumnCount(len(self.headers))
                 self.clear()
 
@@ -124,6 +138,6 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
                         item = QTableWidgetItem(str(r[h]))
                         item.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
                         self.setItem(i, j, item)
-                    if i>3:
+                    if i > 10:
                         break
 
