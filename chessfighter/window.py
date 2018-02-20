@@ -126,8 +126,7 @@ class MainWindow(QMainWindow):
         if not file.open(QFile.ReadOnly | QFile.Text):
             QMessageBox.warning(self,
                                 "Chess Fighter Error",
-                                "Can't open the file {}:\n{}.".format(filename,
-                                                                       file.errorString()))
+                                "Can't open the file {}:\n{}.".format(filename, file.errorString()))
             return
 
         # Add the UI components (here we use a QTextEdit to display the stdout from the process)
@@ -142,25 +141,25 @@ class MainWindow(QMainWindow):
         args = ["make", "{}".format(filename)]
 
         # Add the process and start it
-        self.setupProcess(command, args)
+        self.setupProcess(command, args, filename)
 
         command = "{0}/external/parser".format(os.getcwd())
         args = ["book", "{}".format(filename), "full"]
 
-        self.setupProcess(command, args)
+        self.setupProcess(command, args, filename)
 
         command = "{0}/external/pgnextractor".format(os.getcwd())
         args = ["headers", "{}".format(filename), "full"]
 
-        self.setupProcess(command, args)
+        self.setupProcess(command, args, filename)
 
-    def setupProcess(self, command, args):
+    def setupProcess(self, command, args, filename):
         process = QProcess()
         # Set the channels
         process.setProcessChannelMode(QProcess.MergedChannels)
         # Connect the signal readyReadStandardOutput to the slot of the widget
         # process.readyReadStandardOutput.connect(lambda: self.readStdOutput(process))
-        process.readyReadStandardOutput.connect(partial(self.readStdOutput, command, process))
+        process.readyReadStandardOutput.connect(partial(self.readStdOutput, command, process, filename))
 
         # Run the process with a given command
         process.start(command, args)
@@ -176,7 +175,7 @@ class MainWindow(QMainWindow):
                     process.kill()
 
     @pyqtSlot()
-    def readStdOutput(self, command, p):
+    def readStdOutput(self, command, p, filename):
         # Every time the process has something to output we attach it to the QTextEdit
         # print("command: {}".format(command))
         text = QString(p.readAllStandardOutput())
@@ -187,7 +186,13 @@ class MainWindow(QMainWindow):
 
         if command.endswith("parser"):
             # change DB
-            pass
+            for l in self.bidirectionalListeners:
+                event = {"DB_File": filename, "Origin": self.__class__}
+                # self.parent(event)
+                l()(event)
+                event = {"Book_File": filename, "Origin": self.__class__}
+                # self.parent(event)
+                l()(event)
 
     def save(self):
         """
@@ -420,8 +425,8 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(self.outputPane, "Book")
         self.tab_widget.addTab(self.engine_widget, "Engine")
 
-
         dock.setWidget(self.tab_widget)
+
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
         self.viewMenu.addAction(dock.toggleViewAction())
 

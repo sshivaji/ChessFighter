@@ -47,7 +47,7 @@ class Chessboard(BidirectionalListener, QSvgWidget):
         if event["Origin"] is not self.__class__:
             if "Fen" in event:
                 self.chessboard = chess.Board(event["Fen"])
-                self.drawChessboard()
+                self.drawChessboard(show_arrows=False)
 
 
                 # if "Action" in event:
@@ -112,14 +112,18 @@ class Chessboard(BidirectionalListener, QSvgWidget):
         self.pieceToMove = [piece, ply]
         self.drawChessboard()
 
-    def drawChessboard(self):
+    def drawChessboard(self, show_arrows=True):
         """
         Docstring.
         """
         check = self.chessboard.king(self.chessboard.turn) if self.chessboard.is_check() else None
+        if show_arrows:
+            arrows = [(self.square, self.square), (self.moveFromSquare, self.moveToSquare)]
+        else:
+            arrows = []
+
         self.svgChessboard = chess.svg.board(board=self.chessboard,
-                                             arrows=[(self.square, self.square),
-                                                     (self.moveFromSquare, self.moveToSquare)],
+                                             arrows=arrows,
                                              check=check,
                                              coordinates=False)
         self.svgChessboardEncoded = self.svgChessboard.encode("utf-8")

@@ -48,16 +48,15 @@ class DatabaseWidget(CustomQDockWidget, BidirectionalListener):
         Docstring.
         Processes an event, ignores events coming from this class
         """
-
         if event["Origin"] is not self.__class__:
             if "DB_File" in event:
-                    self.filename = event["DB_File"]
+                self.tableData.filename = event["DB_File"]
 
             if "Fen" in event:
-                self.tableData.reset()
-                fen = event["Fen"]
-                self.tableData.populate_games(fen)
-                self.tableData.more = True
+                self.fen = event["Fen"]
+            self.tableData.reset()
+            self.tableData.populate_games(self.fen)
+            self.tableData.more = True
 
 
 class DatabaseModel(QAbstractTableModel):
@@ -71,6 +70,7 @@ class DatabaseModel(QAbstractTableModel):
         self.chessDB = db
         self.more = True
         self.reset()
+        self.filename = MILLIONBASE_PGN
 
     def reset(self):
         self.results = []
@@ -141,7 +141,7 @@ class DatabaseModel(QAbstractTableModel):
         records = []
         # selecting DB happens now
         try:
-            self.chessDB.open(MILLIONBASE_PGN)
+            self.chessDB.open(self.filename)
             results = self.chessDB.find(fen, limit=limit, skip=skip)
             board = chess.Board(fen)
             for m in results['moves']:
