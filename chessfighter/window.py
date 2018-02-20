@@ -77,7 +77,6 @@ class MainWindow(QMainWindow):
         self.boardDock.setWidget(board_widget)
         self.setCentralWidget(self.boardDock)
 
-
     def printing(self):
         """
         Docstring.
@@ -92,7 +91,6 @@ class MainWindow(QMainWindow):
         document.print(printer)
 
         self.statusBar().showMessage("Ready.", 2000)
-
 
     def openBook(self):
         filename, _ = QFileDialog.getOpenFileName(self,
@@ -115,9 +113,6 @@ class MainWindow(QMainWindow):
             event = {"Book_File": filename, "Origin": self.__class__}
             # self.parent(event)
             l()(event)
-            event = {"Action": "Refresh", "Origin": self.__class__}
-            l()(event)
-
 
     def openDatabase(self):
         filename, _ = QFileDialog.getOpenFileName(self,
@@ -433,7 +428,7 @@ class MainWindow(QMainWindow):
         self.viewMenu.addAction(dock.toggleViewAction())
 
         self.bidirectionalListeners = [self.gamePane.registerListener,
-                                       self.board.registerListener, self.outputPane.registerListener, self.DBPane.registerListener]
+                                       self.board.registerListener,  self.DBPane.registerListener, self.outputPane.registerListener,]
 
         for l in self.bidirectionalListeners:
             event = {"Action": "Game Start", "Fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "Origin": self.__class__}

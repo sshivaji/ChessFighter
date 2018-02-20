@@ -31,7 +31,7 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
         self.setMinimumSize(500, 150)
         self.setSortingEnabled(True)
         self.cellClicked.connect(self.cell_was_clicked)
-        self.headers = [MOVE_COLUMN, "freq", "pct", "draws", "games"]
+        self.headers = [MOVE_COLUMN, "pct", "score", "draws", "games"]
         self.filename = MILLIONBASE_PGN
 
     def cell_was_clicked(self, row, column):
@@ -47,28 +47,20 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
             c = CTGReader(CHESS_CTG_READER)
             c.open(self.filename)
             results = c.find(fen)
-            # self.chessDB.open(self.filename)
-            # results = self.chessDB.find(fen, limit=limit, skip=skip)
             board = chess.Board(fen)
-            # print(results)
-            # print(results)
             for m in results['moves']:
-                # print(m)
-                # m = json.loads(m)
-                # print(m)
                 m['san'] = board.san(chess.Move.from_uci(m['move']))
-                record = {'move': m['san'], 'pct': "{0:.2f}".format(
-                    (m['wins'] + m['draws'] * 0.5) * 100.0 / (m['wins'] + m['draws'] + m['losses'])),
-                          'freq': utilities.num_fmt(m['avg_games']),
-                          'wins': utilities.num_fmt(m['wins']),
-                          'draws': utilities.num_fmt(m['draws']),
+                total = m['wins'] + m['draws'] + m['losses']
+                record = {'move': m['san'], 'pct': "{0:.1f}%".format(
+                    (m['wins'] + m['draws'] * 0.5) * 100.0 / total),
+                          'score': utilities.num_fmt(m['wins'] - m['losses']),
+                          'draws': "{}%".format(utilities.num_fmt(m['draws']/total * 100.0)),
                           'losses': utilities.num_fmt(m['losses']),
-                          'games': utilities.num_fmt(m['avg_games'])}
+                          'games': utilities.num_fmt(total)}
                 records.append(record)
             return records
         except:
             print("Error loading DB")
-            # raise
             return records
 
 
@@ -79,15 +71,13 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
             self.chessDB.open(self.filename)
             results = self.chessDB.find(fen, limit=limit, skip=skip)
             board = chess.Board(fen)
-            print(results)
+            # print(results)
             for m in results['moves']:
-                # print(m)
                 m['san'] = board.san(chess.Move.from_uci(m['move']))
-                record = {'move': m['san'], 'pct': "{0:.2f}".format(
+                record = {'move': m['san'], 'pct': "{0:.1f}%".format(
                     (m['wins'] + m['draws'] * 0.5) * 100.0 / (m['wins'] + m['draws'] + m['losses'])),
-                          'freq': utilities.num_fmt(m['games']),
-                          'wins': utilities.num_fmt(m['wins']),
-                          'draws': utilities.num_fmt(m['draws']),
+                          'score': utilities.num_fmt(m['wins'] - m['losses']),
+                          'draws': "{}%".format(utilities.num_fmt(m['draws']/m['games'] * 100.0)),
                           'losses': utilities.num_fmt(m['losses']),
                           'games': utilities.num_fmt(m['games']),
                           'pgn offsets': m['pgn offsets']}
@@ -106,20 +96,24 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
             # print("Book: {}".format(event))
 
             if "Book_File" in event:
+                # print("event: {}".format(event))
                 self.filename = event["Book_File"]
 
-            if "Fen" in event:
-                fen = event["Fen"]
-                print("Book_Fen: {}".format(event["Fen"]))
+            if "Fen" or "Book_File" in event:
+                print("event: {}".format(event))
+                if "Fen" in event:
+                    self.fen = event["Fen"]
+                print("Book_Fen: {}".format(self.fen))
+                # print("filename: {}".format(self.filename))
                 if self.filename.endswith('ctg'):
                     print("loading CTG FEN")
-                    results = self.query_ctg_db(fen, limit=1)
+                    results = self.query_ctg_db(self.fen, limit=1)
                 else:
                     # print("loading norm")
-                    results = self.query_db(fen, limit=1)
+                    results = self.query_db(self.fen, limit=1)
                 # print("results: {}".format(results))
                 self.setRowCount(5)
-                self.setColumnCount(5)
+                self.setColumnCount(len(self.headers))
                 self.clear()
 
                 self.setHorizontalHeaderLabels(self.headers)

@@ -68,6 +68,12 @@ class ChessGameWidget(BidirectionalListener, QTextBrowser):
                     board = self.currentGame.board()
                     self.parent({"Fen": board.fen(), "Origin": self.__class__})
 
+            elif "Book_File" in event:
+                print("Got Book_File event!")
+                board = self.currentGame.board()
+                self.parent({"Fen": board.fen(), "Origin": self.__class__})
+
+
     def updatePgn(self):
         exporter = chess.pgn.StringExporter(headers=True, variations=True, comments=True)
         pgn_string = self.game.accept(exporter)
