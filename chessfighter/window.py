@@ -20,6 +20,7 @@ from book import OpeningBookWidget
 from chessgame import ChessGameWidget
 
 from database import DatabaseWidget
+from engine import EngineWidget
 from external import chess_db
 
 import qtawesome as qta
@@ -128,7 +129,6 @@ class MainWindow(QMainWindow):
                                 "Chess Fighter Error",
                                 "Can't open the file {}:\n{}.".format(filename, file.errorString()))
             return
-
 
         self.statusBar().showMessage("Opened: {}".format(filename), 2000)
 
@@ -442,7 +442,7 @@ class MainWindow(QMainWindow):
         self.outputPane = OpeningBookWidget(parent=self.sendEvent, dock=dock, db=self.chessDB)
 
         self.tab_widget = QTabWidget()
-        self.engine_widget = QWidget()
+        self.engine_widget = EngineWidget("Engine", parent=self.sendEvent, db=self.chessDB)
 
         self.tab_widget.addTab(self.outputPane, "Book")
         self.tab_widget.addTab(self.engine_widget, "Engine")
@@ -461,7 +461,7 @@ class MainWindow(QMainWindow):
         self.viewMenu.addAction(dock.toggleViewAction())
 
         self.bidirectionalListeners = [self.gamePane.registerListener,
-                                       self.board.registerListener,  self.DBPane.registerListener, self.outputPane.registerListener,]
+                                       self.board.registerListener,  self.DBPane.registerListener, self.outputPane.registerListener, self.engine_widget.registerListener]
 
         for l in self.bidirectionalListeners:
             event = {"Action": "Game Start", "Fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", "Origin": self.__class__}

@@ -49,7 +49,6 @@ class Chessboard(BidirectionalListener, QSvgWidget):
                 self.chessboard = chess.Board(event["Fen"])
                 self.drawChessboard(show_arrows=False)
 
-
                 # if "Action" in event:
             #     if event["Action"] == "Undo":
             #         self.undo()
