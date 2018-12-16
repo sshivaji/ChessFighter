@@ -70,7 +70,6 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
             print("Error loading DB")
             return records
 
-
     def query_db(self, fen, limit=100, skip=0):
         records = []
         # selecting DB happens now

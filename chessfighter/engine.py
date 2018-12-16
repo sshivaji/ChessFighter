@@ -8,6 +8,7 @@ import chess.uci
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QWidget, QLineEdit, QHBoxLayout, QVBoxLayout, QTextEdit, QLabel, QSpinBox, QComboBox, QPushButton
 from PyQt5 import QtGui, QtCore
 from utilities import BidirectionalListener
+import platform
 import utilities
 import json
 import os
@@ -18,6 +19,7 @@ MOVE_COLUMN = "move"
 CHESSDB_EXEC = '../external/parser'
 MILLIONBASE_PGN = '../bases/millionbase.pgn'
 CHESS_CTG_READER = '../external/ctg_reader'
+
 
 class EngineWidget(BidirectionalListener, QWidget):
     """
@@ -74,15 +76,16 @@ class EngineWidget(BidirectionalListener, QWidget):
         # addWidget(self.board_controls)
         self.setLayout(layout)
 
-    def detect_default_engine(self):
-        import platform
+    def detect_platform(self):
         system = platform.system()
-        cpu = cpuinfo.get_cpu_info()
-        bits = cpu['bits']
-        cpu_string = ''
-
         if system == 'Darwin':
             system = 'Mac'
+        return system
+
+    def detect_default_engine(self):
+        cpu = cpuinfo.get_cpu_info()
+        bits = cpu['bits']
+        system = self.detect_platform()
 
         flags = cpu['flags']
         if 'bmi2' in flags:
