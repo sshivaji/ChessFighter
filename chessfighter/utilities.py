@@ -13,11 +13,17 @@ FIGURINE_MAP = {
     "N": u'\u2658'
 }
 
+INV_FIGURING_MAP = {v: k for k, v in FIGURINE_MAP.items()}
 
-def figurizine(move):
+
+def figurizine(move, reverse=False):
     for letter in move:
-        if letter in FIGURINE_MAP:
-            move = move.replace(letter, FIGURINE_MAP[letter])
+        if reverse:
+            if letter in INV_FIGURING_MAP:
+                move = move.replace(letter, INV_FIGURING_MAP[letter])
+        else:
+            if letter in FIGURINE_MAP:
+                move = move.replace(letter, FIGURINE_MAP[letter])
     return move
 
 def num_fmt(num):

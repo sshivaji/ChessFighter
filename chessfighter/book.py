@@ -38,7 +38,7 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
         item = self.item(row, column)
 
         if column == self.headers.index(MOVE_COLUMN):
-            self.parent({"SAN": item.text(), "Origin": self.__class__})
+            self.parent({"SAN": utilities.figurizine(item.text(), reverse=True), "Origin": self.__class__})
 
     def query_ctg_db(self, fen, limit=100, skip=0):
         records = []
