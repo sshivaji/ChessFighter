@@ -44,6 +44,7 @@ class EngineWidget(BidirectionalListener, QWidget):
         self.lines_box.setMinimum(1)
         self.lines_box.setMaximum(9)
         self.lines_box.setSingleStep(1)
+        self.lines_box.valueChanged.connect(self.engine_analysis_lines)
         self.engine_activated = False
         self.fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
@@ -103,24 +104,36 @@ class EngineWidget(BidirectionalListener, QWidget):
 
         if system == 'Windows':
             if cpu_string:
-                cpu_string='_' + cpu_string
+                cpu_string = '_' + cpu_string
             exec_path = "./engines/{}/stockfish_9_x{}{}.exe".format(system, bits, cpu_string)
 
         return exec_path
+
+    @QtCore.pyqtSlot(int)
+    def engine_analysis_lines(self):
+        # print("got value: {}".format(self.lines_box.value()))
+        if self.engine:
+            self.engine.stop()
+            self.engine.setoption({"MultiPV": self.lines_box.value()})
+            self.engine.go(infinite=True, async_callback=True)
 
     @QtCore.pyqtSlot(dict)
     def engine_analysis_update(self, value):
         # print(value)
         text = "<span style=\" color:darkblue;\" font-weight=\"bold;\" >"
         try:
-            if value["score"][1].cp is not None:
-                text += str(value["score"][1].cp/100)
-            if value["depth"]:
-                text += "/{}".format(value["depth"])
-                text += "</span>"
-            board = chess.Board(self.fen)
-            text += "  "
-            text += board.variation_san(value["pv"][1])
+            for index in value["score"]:
+                if value["score"][index].cp is not None:
+                    text += str(value["score"][index].cp/100)
+                if value["depth"]:
+                    text += "/{}".format(value["depth"])
+                    text += "</span>"
+                board = chess.Board(self.fen)
+                text += "  "
+                moves = board.variation_san(value["pv"][index])
+                moves = utilities.figurizine(moves)
+                text += moves
+                text += "<br><br>"
             # text += "</span>"
 
             self.engine_pane.setText(text)
@@ -154,6 +167,7 @@ class EngineWidget(BidirectionalListener, QWidget):
             # print (engine.name)
             board = chess.Board(self.fen)
             self.engine.position(board)
+            self.engine.setoption({"MultiPV": self.lines_box.value()})
 
             self.engine.go(infinite=True, async_callback=True)
             if not self.engine.info_handlers:

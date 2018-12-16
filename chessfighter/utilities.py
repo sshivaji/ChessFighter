@@ -5,6 +5,21 @@ from PyQt5.QtWidgets import QDockWidget
 Docstring.
 """
 
+FIGURINE_MAP = {
+    "K": u'\u2654',
+    "Q": u'\u2655',
+    "R": u'\u2656',
+    "B": u'\u2657',
+    "N": u'\u2658'
+}
+
+
+def figurizine(move):
+    for letter in move:
+        if letter in FIGURINE_MAP:
+            move = move.replace(letter, FIGURINE_MAP[letter])
+    return move
+
 def num_fmt(num):
     i_offset = 15 # change this if you extend the symbols!!!
     prec = 3

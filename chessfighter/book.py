@@ -52,7 +52,7 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
                 m['san'] = board.san(chess.Move.from_uci(m['move']))
                 total = m['wins'] + m['draws'] + m['losses']
 
-                record = {'move': m['san'],
+                record = {'move': utilities.figurizine(m['san']),
                           'score': utilities.num_fmt(m['wins'] - m['losses']),
                           'losses': utilities.num_fmt(m['losses']),
                           'games': utilities.num_fmt(total)}
@@ -82,7 +82,7 @@ class OpeningBookWidget(BidirectionalListener, QTableWidget):
                 m['san'] = board.san(chess.Move.from_uci(m['move']))
                 total = m['wins'] + m['draws'] + m['losses']
 
-                record = {'move': m['san'],
+                record = {'move': utilities.figurizine(m['san']),
                           'score': utilities.num_fmt(m['wins'] - m['losses']),
                           'losses': utilities.num_fmt(m['losses']),
                           'games': utilities.num_fmt(m['games']),

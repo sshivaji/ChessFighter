@@ -8,6 +8,7 @@ import itertools
 from PyQt5.QtWidgets import QTextBrowser
 from PyQt5 import QtGui
 from utilities import BidirectionalListener
+import utilities as util
 
 try:
     from StringIO import StringIO  # Python 2
@@ -20,7 +21,7 @@ class DisplayExporter(pgn.BaseVisitor):
     Allows exporting a game in a viewer friendly screen format
     """
 
-    def __init__(self, columns=80, headers=True, comments=True, variations=True):
+    def __init__(self, columns=80, headers=True, comments=True, variations=True, currentGame=None):
         self.columns = columns
         self.headers = headers
         self.comments = comments
@@ -33,6 +34,7 @@ class DisplayExporter(pgn.BaseVisitor):
         self.current_line = ""
         self.variation_depth = 0
         self.header_map = {}
+        self.currentGame = currentGame
         # pgn.Game.positions = {}
 
     def flush_current_line(self):
@@ -120,8 +122,18 @@ class DisplayExporter(pgn.BaseVisitor):
             tmp_board = board.copy()
             tmp_board.push(move)
             # pgn.Game.positions[str(tmp_board.fen())] = self
+            if tmp_board.fen() == self.currentGame.board().fen():
+                # self.write_line("<br>")
+                self.write_token(
+                    "<a href=\"{}\" style=\" background-color: #FFFF00; text-decoration:none;\" id =\"{}\"> {} </a>".format(tmp_board.fen(), move,
+                                                                                                 util.figurizine(
+                                                                                                     board.san(
+                                                                                                         move)) + " "))
+                # self.write_line("<br>")
 
-            self.write_token("<a href=\"{}\" id =\"{}\"> {} </a>".format(tmp_board.fen(), move, board.san(move) + " "))
+            else:
+                self.write_token("<a href=\"{}\" style=\" text-decoration:none;\" id =\"{}\"> {} </a>".format(tmp_board.fen(), move,
+                                                                         util.figurizine(board.san(move)) + " "))
             self.force_movenumber = False
 
     def visit_result(self, result):
@@ -155,7 +167,9 @@ class ChessGameWidget(BidirectionalListener, QTextBrowser):
         # print(dir(QTextBrowser))
         self.anchorClicked.connect(self.anchor_was_clicked)
         self.setOpenLinks(False)
-
+        # self.setDefaultStyleSheet("a{ text-decoration: none; }")
+        # print(dir(self))
+        self.setAcceptRichText(True)
         # self.html = True
 
     def anchor_was_clicked(self, fen):
@@ -237,7 +251,7 @@ class ChessGameWidget(BidirectionalListener, QTextBrowser):
                 self.parent({"Fen": board.fen(), "Origin": self.__class__})
 
     def updatePgn(self):
-        self.exporter = DisplayExporter(headers=True, variations=True, comments=True)
+        self.exporter = DisplayExporter(headers=True, variations=True, comments=True, currentGame=self.currentGame)
         pgn_string = self.game.accept(self.exporter)
         # print("pgn after operation: {}".format(pgn_string))
         self.setHtml(pgn_string)
