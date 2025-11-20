@@ -17,7 +17,7 @@ from PyQt5.QtWidgets import QTextEdit, QDialog
 
 from board import Chessboard
 from book import OpeningBookWidget
-from chessgame import ChessGameWidget
+from chessgame import ChessGameWidget, ChessGameWithVariationPicker
 
 from database import DatabaseWidget
 from engine import EngineWidget
@@ -430,8 +430,8 @@ class MainWindow(QMainWindow):
         dock = CustomQDockWidget("Game", self)
         dock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
 
-        self.gamePane = ChessGameWidget(parent=self.sendEvent,
-                                        dock=dock)
+        self.gamePane = ChessGameWithVariationPicker(parent=self.sendEvent,
+                                                     dock=dock)
 
         dock.setWidget(self.gamePane)
 
