@@ -157,8 +157,10 @@ class DatabaseModel(QAbstractTableModel):
                           'pgn offsets': m['pgn offsets']}
                 records.append(record)
             return records
-        except:
-            print("Error loading DB")
+        except Exception as e:
+            import traceback
+            print(f"Error loading DB: {type(e).__name__}: {e}")
+            print(traceback.format_exc())
             return records
 
     def get_games(self, fen, skip=0, limit=ROW_BATCH_COUNT):
@@ -183,11 +185,18 @@ class DatabaseModel(QAbstractTableModel):
                 # total_result_count += 1
 
         # print("filtered_game_offset count : {0}".format(len(filtered_game_offsets)))
-        headers = self.chessDB.get_game_headers(self.chessDB.get_games(filtered_game_offsets))
-        for skip, h in zip(filtered_game_offsets, headers):
-            # Should be sent as ID for front end accounting purposes, in an odd way, the offset is the game id,
-            # as its the unique way to access the game
-            h["id"] = skip
-        results = {"records": headers, "queryRecordCount": total_result_count,
-                   "totalRecordCount": total_result_count}
+        try:
+            headers = self.chessDB.get_game_headers(self.chessDB.get_games(filtered_game_offsets))
+            for skip, h in zip(filtered_game_offsets, headers):
+                # Should be sent as ID for front end accounting purposes, in an odd way, the offset is the game id,
+                # as its the unique way to access the game
+                h["id"] = skip
+            results = {"records": headers, "queryRecordCount": total_result_count,
+                       "totalRecordCount": total_result_count}
+        except (UnicodeDecodeError, UnicodeError) as e:
+            print(f"Warning: Encoding error reading PGN games: {e}")
+            results = {"records": [], "queryRecordCount": 0, "totalRecordCount": 0}
+        except Exception as e:
+            print(f"Warning: Error reading PGN games: {e}")
+            results = {"records": [], "queryRecordCount": 0, "totalRecordCount": 0}
         return results

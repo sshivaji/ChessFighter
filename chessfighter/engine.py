@@ -3,7 +3,12 @@ Docstring.
 """
 from queue import Queue
 
-import cpuinfo
+try:
+    import cpuinfo
+    CPUINFO_AVAILABLE = True
+except Exception:
+    CPUINFO_AVAILABLE = False
+
 import chess.uci
 from PyQt5.QtWidgets import QTableWidget, QTableWidgetItem, QWidget, QLineEdit, QHBoxLayout, QVBoxLayout, QTextEdit, QLabel, QSpinBox, QComboBox, QPushButton
 from PyQt5 import QtGui, QtCore
@@ -84,17 +89,29 @@ class EngineWidget(BidirectionalListener, QWidget):
         return system
 
     def detect_default_engine(self):
-        cpu = cpuinfo.get_cpu_info()
-        bits = cpu['bits']
         system = self.detect_platform()
 
-        flags = cpu['flags']
-        if 'bmi2' in flags:
-            cpu_string = 'bmi2'
-        elif 'popcnt' in flags:
-            cpu_string = 'popcnt'
+        if CPUINFO_AVAILABLE:
+            try:
+                cpu = cpuinfo.get_cpu_info()
+                bits = cpu['bits']
+                flags = cpu['flags']
+
+                if 'bmi2' in flags:
+                    cpu_string = 'bmi2'
+                elif 'popcnt' in flags:
+                    cpu_string = 'popcnt'
+                else:
+                    cpu_string = ''
+            except Exception:
+                # Fallback if cpuinfo fails
+                bits = 64 if platform.machine() in ['x86_64', 'AMD64', 'arm64', 'aarch64'] else 32
+                cpu_string = ''
         else:
+            # Fallback when cpuinfo is not available
+            bits = 64 if platform.machine() in ['x86_64', 'AMD64', 'arm64', 'aarch64'] else 32
             cpu_string = ''
+
         exec_path = ''
 
         if system == 'Mac' or system == 'Linux':

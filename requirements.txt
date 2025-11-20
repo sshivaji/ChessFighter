@@ -1,5 +1,5 @@
-pyqt5==5.9.2
-python-chess==0.22.0
+pyqt5>=5.9.2
+python-chess==0.23.11
 pexpect==4.3.1
-qtawesome==0.4.4
+qtawesome==1.0.3
 py-cpuinfo==3.3.0
