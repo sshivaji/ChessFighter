@@ -322,27 +322,29 @@ class MainWindow(QMainWindow):
         self.undoAction = QAction(qta.icon('fa.step-backward'),
                                   "&Undo",
                                   self,
-                                  shortcut=QKeySequence.Undo,
-                                  statusTip="Undo the last move.",
+                                  shortcut="Left",
+                                  statusTip="Previous move (Left Arrow)",
                                   triggered=self.undo)
 
         self.goToStartAction = QAction(qta.icon('fa.fast-backward'),
                                   "&Start",
                                   self,
-                                  statusTip="Go to the beginning",
+                                  shortcut="Home",
+                                  statusTip="Go to the beginning (Home)",
                                   triggered=self.goToStart)
 
         self.goToEndAction = QAction(qta.icon('fa.fast-forward'),
                                        "&End",
                                        self,
-                                       statusTip="Go to the end",
+                                       shortcut="End",
+                                       statusTip="Go to the end (End)",
                                        triggered=self.goToEnd)
 
         self.forwardAction = QAction(qta.icon('fa.step-forward'),
                                   "&Forward",
                                   self,
-                                  shortcut=QKeySequence.Forward,
-                                  statusTip="Go to the next move",
+                                  shortcut="Right",
+                                  statusTip="Next move (Right Arrow)",
                                   triggered=self.forward)
 
         self.quitAction = QAction("&Quit",
