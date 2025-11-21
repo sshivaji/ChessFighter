@@ -1,24 +1,44 @@
 """
-Docstring.
+Chessboard widget using chessground library in QWebEngineView.
 """
 import chess
 import chess.pgn
-import chess.svg
+import json
+import os
 
-from PyQt5.QtCore import QSize
-from PyQt5.QtCore import Qt
-from PyQt5.QtSvg import QSvgWidget
+from PyQt5.QtCore import QUrl, pyqtSlot, QObject
+from PyQt5.QtWebChannel import QWebChannel
+from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 
 from utilities import BidirectionalListener
 
 
-class Chessboard(BidirectionalListener, QSvgWidget):
+class PyBridge(QObject):
     """
-    Docstring.
+    Bridge object for JavaScript to Python communication.
+    """
+    def __init__(self, parent):
+        super().__init__()
+        self.parent = parent
+
+    @pyqtSlot(str)
+    def onMove(self, move_str):
+        """Called from JavaScript when a move is made on the board."""
+        self.parent.handleMoveFromJS(move_str)
+
+    @pyqtSlot()
+    def onBoardReady(self):
+        """Called from JavaScript when the board is initialized."""
+        print("Chessground board is ready")
+
+
+class Chessboard(BidirectionalListener, QWebEngineView):
+    """
+    Chessboard widget using chessground library.
     """
     def __init__(self, parent):
         """
-        Docstring.
+        Initialize the chessboard.
         """
         super(Chessboard, self).__init__()
         self.parent = parent
@@ -27,112 +47,121 @@ class Chessboard(BidirectionalListener, QSvgWidget):
         self.moveToSquare = -10
         self.square = -10
 
-        self.margin = 0
-        self.pieceToMove = [None, None]
-
         self.chessboard = chess.Board()
-        self.drawChessboard()
-        self.mouseReleaseEvent = self.mouseEvent
+
+        # Set up web channel for JS-Python communication
+        self.channel = QWebChannel()
+        self.bridge = PyBridge(self)
+        self.channel.registerObject('pybridge', self.bridge)
+        self.page().setWebChannel(self.channel)
+
+        # Enable web features
+        settings = self.settings()
+        settings.setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
+        settings.setAttribute(QWebEngineSettings.JavascriptEnabled, True)
+
+        # Load the chessground HTML
+        html_path = os.path.join(os.path.dirname(__file__), 'board_chessground.html')
+        self.load(QUrl.fromLocalFile(html_path))
+
+        # Wait for page to load before drawing
+        self.loadFinished.connect(self.onLoadFinished)
+
+    def onLoadFinished(self, ok):
+        """Called when the web page finishes loading."""
+        if ok:
+            self.drawChessboard()
 
     def registerListener(self):
         """
-        Docstring.
+        Register this widget as a listener.
         """
         return self.processEvent
 
     def processEvent(self, event):
         """
-        Processes an event, ignores events coming from this class
+        Processes an event, ignores events coming from this class.
         """
         if event["Origin"] is not self.__class__:
             if "Fen" in event:
                 self.chessboard = chess.Board(event["Fen"])
                 self.drawChessboard(show_arrows=False)
 
-                # if "Action" in event:
-            #     if event["Action"] == "Undo":
-            #         self.undo()
-            # if "Move" in event and "Fen" not in event:
-            #     pieceEvent = {"Move": chess.Move.from_uci(event["Move"]), "Fen": self.chessboard.fen(), "Origin": self.__class__}
-            #     self.parent(pieceEvent)
-
-    # def undo(self):
-    #     self.chessboard.pop()
-    #     self.drawChessboard()
-    #     pieceEvent = {"Fen": self.chessboard.fen(), "Origin": self.__class__}
-    #     self.parent(pieceEvent)
-
-    def mouseEvent(self, event):
+    def handleMoveFromJS(self, move_str):
         """
-        Docstring.
+        Handle a move made in the JavaScript chessground board.
         """
-        boardWidth = self.width() / 8
-        boardHeight = self.height() / 8
+        try:
+            # move_str is in format like "e2e4"
+            move = chess.Move.from_uci(move_str)
 
-        file = int((event.x() - self.margin) / boardWidth)
-        rank = 7 - int((event.y() - self.margin) / boardHeight)
-
-        if rank < 0:
-            rank = 0
-
-        if file < 0:
-            file = 0
-
-        if file > 7:
-            file = 7
-
-        if rank > 7:
-            rank = 7
-
-        self.square = chess.square(file,
-                                   rank)
-        piece = self.chessboard.piece_at(self.square)
-
-        fileCharacter = chr(file + 97)
-        rankNumber = str(rank + 1)
-        ply = "{}{}".format(fileCharacter,
-                            rankNumber)
-
-        if self.pieceToMove[0]:
-            move = chess.Move.from_uci("{}{}".format(self.pieceToMove[1],
-                                                     ply))
             if move in self.chessboard.legal_moves:
                 self.chessboard.push(move)
 
-                pieceEvent = {"Move": move, "Fen": self.chessboard.fen(), "Origin": self.__class__}
+                pieceEvent = {
+                    "Move": move,
+                    "Fen": self.chessboard.fen(),
+                    "Origin": self.__class__
+                }
                 self.parent(pieceEvent)
 
                 self.moveFromSquare = move.from_square
                 self.moveToSquare = move.to_square
 
-                piece = None
-                ply = None
-
-        self.pieceToMove = [piece, ply]
-        self.drawChessboard()
+                self.drawChessboard()
+            else:
+                # Move was not legal, reset the board position
+                self.drawChessboard()
+        except Exception as e:
+            print(f"Error handling move: {e}")
+            self.drawChessboard()
 
     def drawChessboard(self, show_arrows=True):
         """
-        Docstring.
+        Update the chessboard display.
         """
-        check = self.chessboard.king(self.chessboard.turn) if self.chessboard.is_check() else None
-        if show_arrows:
-            arrows = [(self.square, self.square), (self.moveFromSquare, self.moveToSquare)]
+        # Set the position
+        fen = self.chessboard.fen()
+        self.page().runJavaScript(f"window.setPosition('{fen}');")
+
+        # Update legal moves
+        legal_moves_map = {}
+        for move in self.chessboard.legal_moves:
+            orig = chess.square_name(move.from_square)
+            dest = chess.square_name(move.to_square)
+
+            if orig not in legal_moves_map:
+                legal_moves_map[orig] = []
+            legal_moves_map[orig].append(dest)
+
+        legal_moves_json = json.dumps(legal_moves_map)
+        self.page().runJavaScript(f"window.setMovable({legal_moves_json});")
+
+        # Highlight last move and check
+        if show_arrows and (self.moveFromSquare >= 0 and self.moveToSquare >= 0):
+            from_square = chess.square_name(self.moveFromSquare)
+            to_square = chess.square_name(self.moveToSquare)
+
+            # Highlight check if in check
+            if self.chessboard.is_check():
+                king_square = chess.square_name(
+                    self.chessboard.king(self.chessboard.turn)
+                )
+                self.page().runJavaScript(
+                    f"window.highlightSquares(['{from_square}', '{to_square}', '{king_square}'], 'red');"
+                )
+            else:
+                self.page().runJavaScript(
+                    f"window.highlightSquares(['{from_square}', '{to_square}'], 'paleBlue');"
+                )
         else:
-            arrows = []
+            self.page().runJavaScript("window.clearHighlights();")
 
-        self.svgChessboard = chess.svg.board(board=self.chessboard,
-                                             arrows=arrows,
-                                             check=check,
-                                             coordinates=False)
-        self.svgChessboardEncoded = self.svgChessboard.encode("utf-8")
-        self.load(self.svgChessboardEncoded)
+    def setOrientation(self, color):
+        """
+        Set the board orientation.
 
-    def resizeEvent(self, event):
+        Args:
+            color: 'white' or 'black'
         """
-        Docstring.
-        """
-        newSize = QSize(10, 10)
-        newSize.scale(event.size(), Qt.KeepAspectRatio)
-        # print(newSize * 0.95)
-        self.resize(newSize)
+        self.page().runJavaScript(f"window.setOrientation('{color}');")
