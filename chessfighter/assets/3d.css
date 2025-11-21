@@ -1,0 +1,180 @@
+/* Chessground 3D styles - using local PNG assets */
+
+.in3d .cg-wrap {
+    perspective: 2000px;
+    transform-style: preserve-3d;
+    overflow: visible !important;
+}
+
+.in3d cg-board {
+    overflow: visible !important;
+}
+
+.in3d cg-board square {
+    overflow: visible !important;
+}
+
+/* Board background */
+.in3d {
+    background-image: url('images/board/3d/woodi.1024.png');
+    background-size: cover;
+    background-position: center;
+}
+
+.in3d .cg-wrap {
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+    background-image: url('images/board/3d/woodi.1024.png');
+    background-size: cover;
+    background-position: center;
+}
+
+/* Override chessground's square colors to show wood texture */
+.in3d cg-board square {
+    background: transparent !important;
+}
+
+/* Light squares - very subtle light tint over wood */
+.in3d cg-board square.light {
+    background: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Dark squares - very subtle dark tint over wood */
+.in3d cg-board square.dark {
+    background: rgba(139, 90, 43, 0.25) !important;
+}
+
+/* Hide default piece SVGs and use PNG images instead */
+.in3d piece {
+    background-image: none !important;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+}
+
+/* White pieces */
+.in3d piece.white {
+    overflow: visible !important;
+    //position: relative !important;
+    //top: -1.5em !important;
+}
+
+.in3d piece.pawn.white {
+    background-image: url('images/pieces/staunton/basic/White-Pawn.png') !important;
+    //background-size: 130%;
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    top: -1.5em !important;
+}
+
+.in3d piece.knight.white {
+    background-image: url('images/pieces/staunton/basic/White-Knight.png') !important;
+    background-size: 130%;
+    background-repeat: no-repeat;
+    background-position: center 40%;
+}
+
+.in3d piece.bishop.white {
+    background-image: url('images/pieces/staunton/basic/White-Bishop.png') !important;
+    background-size: 130%;
+    background-repeat: no-repeat;
+    background-position: center 40%;
+}
+
+.in3d piece.rook.white {
+    background-image: url('images/pieces/staunton/basic/White-Rook.png') !important;
+    //background-size: 120%;
+    background-repeat: no-repeat;
+    background-position: center 55%;
+    top: -1em !important;
+    left: 1em !important;
+}
+
+.in3d piece.queen.white {
+    background-image: url('images/pieces/staunton/basic/White-Queen.png') !important;
+    background-size: 120%;
+    background-repeat: no-repeat;
+    background-position: center 40%;
+}
+
+.in3d piece.king.white {
+    background-image: url('images/pieces/staunton/basic/White-King.png') !important;
+    background-size: 120%;
+    background-repeat: no-repeat;
+    background-position: center 40%;
+}
+
+/* Black pieces */
+.in3d piece.pawn.black {
+    background-image: url('images/pieces/staunton/basic/Black-Pawn.png') !important;
+    background-size: 130%;
+    background-repeat: no-repeat;
+    background-position: center 45%;
+}
+
+.in3d piece.knight.black {
+    background-image: url('images/pieces/staunton/basic/Black-Knight.png') !important;
+    background-size: 130%;
+    background-repeat: no-repeat;
+    background-position: center 45%;
+}
+
+.in3d piece.bishop.black {
+    background-image: url('images/pieces/staunton/basic/Black-Bishop.png') !important;
+    background-size: 130%;
+    background-repeat: no-repeat;
+    background-position: center 45%;
+}
+
+.in3d piece.rook.black {
+    background-image: url('images/pieces/staunton/basic/Black-Rook.png') !important;
+    background-size: 130%;
+    background-repeat: no-repeat;
+    background-position: center 45%;
+}
+
+.in3d piece.queen.black {
+    background-image: url('images/pieces/staunton/basic/Black-Queen.png') !important;
+    background-size: 130%;
+    background-repeat: no-repeat;
+    background-position: center 45%;
+}
+
+.in3d piece.king.black {
+    background-image: url('images/pieces/staunton/basic/Black-King.png') !important;
+    background-size: 130%;
+    background-repeat: no-repeat;
+    background-position: center 45%;
+}
+
+/* Additional shadow under pieces */
+.in3d square piece::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 15%;
+    right: 15%;
+    height: 8px;
+    background: radial-gradient(ellipse, rgba(0,0,0,0.5) 0%, transparent 80%);
+    z-index: -1;
+}
+
+/* Dragging pieces - enhance shadow without transform */
+.in3d piece.dragging {
+    z-index: 100 !important;
+    filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.7)) !important;
+    cursor: grabbing !important;
+    opacity: 0.9;
+}
+
+/* Hide ghost pieces in 3D mode */
+.in3d piece.ghost {
+    opacity: 0 !important;
+}
+
+/* Smooth transitions - but NOT for dragging */
+.in3d piece:not(.dragging) {
+    transition: filter 0.15s ease-out;
+}
+
+/* Selected piece highlight - enhance shadow only */
+.in3d piece.selected {
+    filter: drop-shadow(0 5px 10px rgba(0, 0, 0, 0.6));
+}
